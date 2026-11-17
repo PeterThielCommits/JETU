@@ -25,6 +25,11 @@ const APP_ROUTES = new Set([
   'compare',
   'saved',
   'match',
+  'plan',
+  'applications',
+  'vault',
+  'writing',
+  'admin',
 ]);
 
 function notFoundResponse(locale: Locale) {
@@ -70,8 +75,13 @@ export async function proxy(request: NextRequest) {
           /^[1-9][0-9]*$/.test(segments[2] ?? '')) ||
         ((segments[1] === 'scholarships' || segments[1] === 'opportunities') &&
           /^[a-z0-9]+(-[a-z0-9]+)*$/.test(segments[2] ?? '')));
+    const isApplicationDetail =
+      segments.length === 3 &&
+      segments[1] === 'applications' &&
+      /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(segments[2] ?? '');
     if (
       !isCatalogDetail &&
+      !isApplicationDetail &&
       (segments.length > 2 ||
         (segments.length === 2 &&
           !APP_ROUTES.has(segments[1] ?? '') &&
@@ -83,6 +93,18 @@ export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   // Overwrite client-supplied header; never trust it as identity or locale.
   requestHeaders.set('x-jetu-locale', isLocale(candidate) ? candidate : 'ru');
+  const privateRoute =
+    isLocale(candidate) &&
+    new Set([
+      'dashboard',
+      'onboarding',
+      'saved',
+      'match',
+      'plan',
+      'applications',
+      'vault',
+      'writing',
+    ]).has(segments[1] ?? '');
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   const env = getPublicEnv();
   if (
@@ -90,8 +112,22 @@ export async function proxy(request: NextRequest) {
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   ) {
     const supabase = createRouteSupabaseClient(request, response);
-    await supabase.auth.getClaims();
+    const { data, error } = await supabase.auth.getClaims();
+    if (privateRoute && (error || !data?.claims?.sub)) {
+      const denied = NextResponse.redirect(
+        new URL(`/${candidate}/login`, request.url),
+      );
+      for (const cookie of response.cookies.getAll())
+        denied.cookies.set(cookie);
+      denied.headers.set('Cache-Control', 'private, no-store');
+      return denied;
+    }
   }
+  if (
+    privateRoute &&
+    (!env.NEXT_PUBLIC_SUPABASE_URL || !env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+  )
+    return NextResponse.redirect(new URL(`/${candidate}/login`, request.url));
   return response;
 }
 export const config = {

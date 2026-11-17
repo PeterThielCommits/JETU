@@ -12,7 +12,15 @@ export function WorkspaceNav({
     href: string;
     label: string;
     count?: number | null;
-    icon: 'book' | 'search' | 'check' | 'arrow' | 'calendar' | 'bell';
+    icon:
+      | 'book'
+      | 'search'
+      | 'check'
+      | 'arrow'
+      | 'calendar'
+      | 'bell'
+      | 'download'
+      | 'settings';
   }[];
 }) {
   const pathname = usePathname();

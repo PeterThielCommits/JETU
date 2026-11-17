@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
   turbopack: { root: resolve() },
   poweredByHeader: false,
   reactStrictMode: true,
+  experimental: {
+    // Record the security upgrade policy so future advisories are surfaced.
+    agentUpgrade: 'security',
+  },
   async headers() {
     return [
       {
@@ -28,6 +32,20 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
           },
+        ],
+      },
+      {
+        source: '/:locale/vault/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'private, no-store' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+        ],
+      },
+      {
+        source: '/:locale/writing/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'private, no-store' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
         ],
       },
     ];

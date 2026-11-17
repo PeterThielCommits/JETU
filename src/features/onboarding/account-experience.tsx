@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { JetuMascot } from '@/components/ui/mascot';
 import { Icon } from '@/components/ui/icon';
+import { InvitationField } from '@/features/auth/invitation-field';
 import { authCopy } from '@/lib/i18n/auth';
 import type { Locale } from '@/lib/i18n/messages';
 import { journeyCopy } from './journey-copy';
@@ -172,6 +173,7 @@ export function AccountExperience({
         >
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="privacyVersion" value={privacyVersion} />
+          {!signup && <InvitationField />}
           <fieldset className="journey-fieldset" disabled={pending}>
             <legend className="sr-only">{signup ? a.signUp : a.signIn}</legend>
             {signup && (
