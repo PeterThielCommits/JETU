@@ -9,7 +9,25 @@ Auth/REST still blocks integrated acceptance; phase labels below are unchanged.
 MVP hardened and locally rechecked; hosted Auth/REST and verified corpus still block
 FULL AND VERIFIED. Earlier phase labels are unchanged.
 
-Current request state: **Phase 23 PARTIAL**. The explicitly authorized deadline/calendar/inbox and existing dashboard/search work is implemented; see `PHASE_23_QA.md`. Phase 24 is not started. Earlier acceptance labels remain unchanged.
+**2026-11-17 MVP closure integration:** branch `codex/mvp-closure-integration`
+merges the Phase 16.5/17/18/19 stack and the catalog review/publish slice onto the
+Phase 23 line, preserving the shipped student UX, deadlines and security upgrade.
+`npm run check` passes 262 unit/integration tests and a production build; 34
+journey UI/a11y cases pass; `npm audit` reports zero vulnerabilities. This is
+local evidence, not a phase verification: real reviewed catalog rows, hosted
+two-account acceptance, scanner/backup operations and the full Phase 11/28
+editorial pipeline remain open. No phase below is upgraded to VERIFIED by this
+integration.
+
+**2026-11-17 MVP closure integration:** branch `codex/mvp-closure-integration`
+merges the Phase 16.5/17/18/19 stack and the catalog review/publish slice onto the
+Phase 23 line, preserving the shipped student UX, deadlines and security upgrade.
+`npm run check` passes 262 unit/integration tests and a production build; 34
+journey UI/a11y cases pass; `npm audit` reports zero vulnerabilities. This is
+local evidence, not a phase verification: real reviewed catalog rows, hosted
+two-account acceptance, scanner/backup operations and the full Phase 11/28
+editorial pipeline remain open. No phase below is upgraded to VERIFIED by this
+integration.
 
 Historical Phase 16 context: **PARTIAL**. The authenticated matching API, deterministic rule/ranking engine, private owner-RLS persistence, and localized workspace are implemented and cloud SQL-tested. The authorized development catalog has zero programs and scholarships; direct hosted Auth/REST is unavailable from this workspace. Live profile-to-recommendation behavior and deployment therefore remain unverified. Earlier partial/unverified phase labels are preserved. Phase 17 has not started.
 
@@ -25,15 +43,15 @@ Historical Phase 16 context: **PARTIAL**. The authenticated matching API, determ
 | 08    | Supabase Auth, RLS, sessions, roles и onboarding                 | IMPLEMENTED (NOT VERIFIED) | Auth actions/callbacks/session refresh shipped in `6dde0de`; no phase gate or acceptance evidence recorded yet                                                                                       |
 | 09    | Полноценный Academic & Personal Profile Builder                  | IMPLEMENTED (NOT VERIFIED) | Dashboard group and `student_profiles` persistence shipped in `4e7e7e0`; unit tests only; no phase gate recorded yet                                                                                 |
 | 10    | Canonical PostgreSQL Global Admissions Database                  | UNVERIFIED                 | Cloud normalized schema exists; migration SQL recovered, phase acceptance not rechecked                                                                                                              |
-| 11    | Data ingestion, верификация, обновления и provenance             | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
+| 11    | Data ingestion, верификация, обновления и provenance             | PARTIAL                    | Policy-gated source boundary, change detection and editorial review/publish slice; no automated fetch/parser/scheduler or full queue. See DATA_INGESTION.md and CATALOG_EDITOR_QA.md                 |
 | 12    | University & Program Explorer                                    | PARTIAL                    | Read-only cloud SQL search, pages, filter fixtures; no real reviewed rows; REST proxy 403; see Phase 12 review                                                                                       |
 | 13    | Scholarship Intelligence & Financial Aid Explorer                | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 | 14    | Global Opportunities Hub, школы и extracurriculars               | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 | 15    | Unified Search, Saved Lists и Side-by-side Compare               | PARTIAL                    | Programs/scholarships/opportunities search, private saves and 2–4 program compare implemented; cloud SQL/RLS/10k benchmark and local UI checks pass; live corpus/REST/deploy gates remain open       |
 | 16    | Explainable Matching Engine v1 + evaluation                      | PARTIAL                    | Deterministic rules/ranking, private API/UI and development RLS tests; zero live program/scholarship rows and no hosted Auth/REST E2E                                                                |
-| 17    | Personalized Roadmap & Gap-to-Action Planner                     | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
-| 18    | Admissions Application CRM: от draft до enrollment               | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
-| 19    | Secure Supabase Document Vault & Writing Workspace               | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
+| 17    | Personalized Roadmap & Gap-to-Action Planner                     | IMPLEMENTED (NOT VERIFIED) | Roadmap engine, persistence, five views and workload planning integrated on `codex/mvp-closure-integration`; hosted two-user/data acceptance open. See PHASE_17_QA.md                                |
+| 18    | Admissions Application CRM: от draft до enrollment               | IMPLEMENTED (NOT VERIFIED) | Application portfolio, state machines, checklist and audit trail integrated; hosted two-user/reviewed-target acceptance open. See PHASE_18_QA.md                                                     |
+| 19    | Secure Supabase Document Vault & Writing Workspace               | IMPLEMENTED (NOT VERIFIED) | Private Vault/Writing, immutable versions and archive controls integrated; scanner, backup/restore and hosted acceptance open. See PHASE_19_QA_AND_RELEASE.md                                        |
 | 20    | Jetu AI Coach: grounded assistant with tools                     | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 | 21    | AI Writing Studio, Essay Coach, CV & Interview Lab               | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 | 22    | Verified Mentor Network and Review Workflow                      | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
@@ -42,7 +60,7 @@ Historical Phase 16 context: **PARTIAL**. The authenticated matching API, determ
 | 25    | Post-offer Finance, Visa & Enrollment Journey                    | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 | 26    | B2B School / Counselor Multi-tenant Workspace                    | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 | 27    | Monetization, Billing, Entitlements & Unit Economics             | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
-| 28    | Operations/Admin Studio, Content Governance & Support            | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
+| 28    | Operations/Admin Studio, Content Governance & Support            | PARTIAL                    | Source-first catalog review/publish console with reviewer roles and audit integrated; editing, role management, support/abuse and broader operations remain open. See CATALOG_EDITOR_QA.md           |
 | 29    | Supabase RLS security, QA, resilience, performance and cost      | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 | 30    | Production readiness, launch plan, metrics & YC-quality evidence | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 
