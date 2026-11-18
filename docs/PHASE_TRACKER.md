@@ -1,4 +1,4 @@
-# Phase tracker — updated 2026-10-25
+# Phase tracker — updated 2026-11-18
 
 **2026-11-04 student UX:** user-authorized account/profile/privacy redesign and
 original mascot implemented; see [STUDENT_EXPERIENCE.md](STUDENT_EXPERIENCE.md).
@@ -19,27 +19,26 @@ two-account acceptance, scanner/backup operations and the full Phase 11/28
 editorial pipeline remain open. No phase below is upgraded to VERIFIED by this
 integration.
 
-**2026-11-17 MVP closure integration:** branch `codex/mvp-closure-integration`
-merges the Phase 16.5/17/18/19 stack and the catalog review/publish slice onto the
-Phase 23 line, preserving the shipped student UX, deadlines and security upgrade.
-`npm run check` passes 262 unit/integration tests and a production build; 34
-journey UI/a11y cases pass; `npm audit` reports zero vulnerabilities. This is
-local evidence, not a phase verification: real reviewed catalog rows, hosted
-two-account acceptance, scanner/backup operations and the full Phase 11/28
-editorial pipeline remain open. No phase below is upgraded to VERIFIED by this
-integration.
+**2026-11-18 audit and planning delivery:** authored the Phase 01 pitch
+traceability matrix, Phase 02 PRD, Phase 03 domain architecture, Phase 07
+IA/mobile/a11y audit, Phase 29 threat model and Phase 30 go-live/YC frameworks.
+These close the analysis deliverables with repository evidence; hosted
+acceptance, reviewed corpus, staging and production authorization remain open.
+No runtime code changed in this pass. A new dev-only `picomatch` ReDoS advisory
+(GHSA-fc5q-39xc-vjpf, no upstream patch) is documented in
+`SECURITY_ADVISORIES.md`; `npm audit --omit=dev` remains 0.
 
 Historical Phase 16 context: **PARTIAL**. The authenticated matching API, deterministic rule/ranking engine, private owner-RLS persistence, and localized workspace are implemented and cloud SQL-tested. The authorized development catalog has zero programs and scholarships; direct hosted Auth/REST is unavailable from this workspace. Live profile-to-recommendation behavior and deployment therefore remain unverified. Earlier partial/unverified phase labels are preserved. Phase 17 has not started.
 
 | Phase | Title                                                            | Status                     | Evidence / dependency                                                                                                                                                                                |
 | ----- | ---------------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 01    | Forensic audit питча, репозитория и продуктовых утверждений      | UNVERIFIED                 | No prior checkpoint or implementation evidence in supplied repo                                                                                                                                      |
-| 02    | Product strategy, UX research и сфокусированный wedge            | UNVERIFIED                 | No prior checkpoint or implementation evidence in supplied repo                                                                                                                                      |
-| 03    | Supabase-first modular architecture, ADR и domain boundaries     | UNVERIFIED                 | No prior checkpoint or implementation evidence in supplied repo                                                                                                                                      |
+| 01    | Forensic audit питча, репозитория и продуктовых утверждений      | IMPLEMENTED_AND_TESTED     | `docs/PITCH_TRACEABILITY.md`: slide-by-slide evidence matrix, secrets/dependency audit, test inventory; no hosted claim made                                                                         |
+| 02    | Product strategy, UX research и сфокусированный wedge            | IMPLEMENTED_AND_TESTED     | `docs/PRD.md`: ICP/JTBD, personas, three journeys, MVP/V1/V2 split, NOT DOING list, 6 KPIs, screen-to-signal map                                                                                     |
+| 03    | Supabase-first modular architecture, ADR и domain boundaries     | IMPLEMENTED_AND_TESTED     | `docs/PHASE_03_ARCHITECTURE.md`: C4/domain ownership, sequences, transactions, ADR index; companion `ARCHITECTURE.md`                                                                                |
 | 04    | Репозиторий, зависимости и инженерный фундамент                  | PARTIAL                    | App + CI DB replay/SQL/types and cloud baseline verified; full stack / direct cloud REST unverified; see latest evidence                                                                             |
 | 05    | Уникальная визуальная система Jetu и brand identity              | VERIFIED                   | Pitch reconciled; tokens/assets/shared components; RU/KK/EN showcase; 50 unit/integration + 30 E2E, axe, contrast and 6 visual diffs passed; see PHASE_05_REVIEW                                     |
 | 06    | High-converting landing, SEO и motion                            | PARTIAL                    | 39 localized pages, truthful demo, SEO, Chromium/axe and mobile Lighthouse lab evidence; onboarding/pricing/catalog gates open. See PHASE_06_REVIEW                                                  |
-| 07    | IA, mobile UX, localization и accessibility                      | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
+| 07    | IA, mobile UX, localization и accessibility                      | IMPLEMENTED (NOT VERIFIED) | `docs/IA_MOBILE_A11Y_AUDIT.md`: route/nav inventory, RU/KK/EN parity, axe/keyboard/reduced-motion evidence; physical-device and hosted-auth a11y passes open                                         |
 | 08    | Supabase Auth, RLS, sessions, roles и onboarding                 | IMPLEMENTED (NOT VERIFIED) | Auth actions/callbacks/session refresh shipped in `6dde0de`; no phase gate or acceptance evidence recorded yet                                                                                       |
 | 09    | Полноценный Academic & Personal Profile Builder                  | IMPLEMENTED (NOT VERIFIED) | Dashboard group and `student_profiles` persistence shipped in `4e7e7e0`; unit tests only; no phase gate recorded yet                                                                                 |
 | 10    | Canonical PostgreSQL Global Admissions Database                  | UNVERIFIED                 | Cloud normalized schema exists; migration SQL recovered, phase acceptance not rechecked                                                                                                              |
@@ -61,8 +60,8 @@ Historical Phase 16 context: **PARTIAL**. The authenticated matching API, determ
 | 26    | B2B School / Counselor Multi-tenant Workspace                    | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 | 27    | Monetization, Billing, Entitlements & Unit Economics             | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
 | 28    | Operations/Admin Studio, Content Governance & Support            | PARTIAL                    | Source-first catalog review/publish console with reviewer roles and audit integrated; editing, role management, support/abuse and broader operations remain open. See CATALOG_EDITOR_QA.md           |
-| 29    | Supabase RLS security, QA, resilience, performance and cost      | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
-| 30    | Production readiness, launch plan, metrics & YC-quality evidence | BACKLOG                    | Not started; requires explicit phase authorization                                                                                                                                                   |
+| 29    | Supabase RLS security, QA, resilience, performance and cost      | PARTIAL                    | `docs/THREAT_MODEL.md`: asset/threat register, RLS/privacy review, 10k performance evidence, resilience gaps; hosted advisors, restore drill and scanner vendor open                                 |
+| 30    | Production readiness, launch plan, metrics & YC-quality evidence | PARTIAL                    | `docs/GO_LIVE.md` + `docs/YC_READINESS.md`: environment/gate plan, deploy/rollback, metrics and honest traction baseline; staging, corpus, hosted keys and deploy authorization open                 |
 
 ## Phase 04 gate
 

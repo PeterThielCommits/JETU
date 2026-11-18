@@ -1,9 +1,28 @@
 # MVP Gap Analysis — 17 phases remaining for P0 closure
 
 **Generated:** 2026-11-17
-**Integration base:** `codex/mvp-closure-integration` (commit `85178ad`)
+**Updated:** 2026-11-18 — audit/planning phases delivered
+**Integration base:** `codex/mvp-closure-integration` (commit `85178ad` + docs)
 **Status:** `npm run check` passes (format, lint, typecheck, 262 tests, build, audit=0 vulnerabilities)
 **Note:** All evidence below is local — real hosted authenticated acceptance, reviewed catalog corpus, and production deployment remain open requirements.
+
+## 2026-11-18 update — phases closed as analysis deliverables
+
+The following phases now have complete, repository-grounded artifacts and are no
+longer pure backlog:
+
+| Phase | Deliverable                               | New status                      |
+| ----- | ----------------------------------------- | ------------------------------- |
+| 01    | `docs/PITCH_TRACEABILITY.md`              | IMPLEMENTED_AND_TESTED          |
+| 02    | `docs/PRD.md`                             | IMPLEMENTED_AND_TESTED          |
+| 03    | `docs/PHASE_03_ARCHITECTURE.md`           | IMPLEMENTED_AND_TESTED          |
+| 07    | `docs/IA_MOBILE_A11Y_AUDIT.md`            | IMPLEMENTED (NOT VERIFIED)      |
+| 29    | `docs/THREAT_MODEL.md`                    | PARTIAL (verification/ops open) |
+| 30    | `docs/GO_LIVE.md`, `docs/YC_READINESS.md` | PARTIAL (staging/deploy open)   |
+
+Remaining phase count for full MVP P0 is therefore reduced, but **no blocked phase
+was promoted to VERIFIED**: hosted acceptance, corpus, scanner, restore drill and
+production authorization still gate 04/06/08/09/10/12/15/16/23.
 
 ## Closed / Integrated (code present, local evidence sufficient for PARTIAL)
 
@@ -30,23 +49,23 @@ These 5 phases have code on branches/PRs that were merged/rebased into the integ
 | 19    | Document Vault   | IMPLEMENTED (NOT VERIFIED) | Private Vault/Writing, immutable versions, archive, scanner/backup integrated; acceptance open                                               |
 | 28    | Admin publishing | PARTIAL                    | Catalog review/publish console with reviewer roles and audit integrated; editing, role management, support/abuse and broader ops remain open |
 
-These 4 phases require new development, separate audits, or infrastructure that is not yet present in the codebase.
+These 4 phases require new development, separate audits, or infrastructure that is not yet present in the codebase (statuses updated 2026-11-18 where noted).
 
-| Phase | Title                  | Status  | Gap to VERIFIED                                                                                                                          |
-| ----- | ---------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 07    | IA/mobile/a11y         | BACKLOG | Separate IA/mobile/a11y audit and fixes required                                                                                         |
-| 11    | Ingestion/verification | PARTIAL | Full editorial pipeline (provenance, reviewer roles, source claims, publish console) — no automated fetch/parser/scheduler or full queue |
-| 29    | Security/QA            | BACKLOG | Full threat model, load/perf, privacy/delete, restore drill required                                                                     |
-| 30    | Production readiness   | BACKLOG | Production live/CI/Vercel launch plan, metrics, staging separation, YC-evidence                                                          |
+| Phase | Title                  | Status                     | Gap to VERIFIED                                                                                                                          |
+| ----- | ---------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 07    | IA/mobile/a11y         | IMPLEMENTED (NOT VERIFIED) | Audit delivered in `IA_MOBILE_A11Y_AUDIT.md`; physical-device and hosted-auth a11y passes open                                           |
+| 11    | Ingestion/verification | PARTIAL                    | Full editorial pipeline (provenance, reviewer roles, source claims, publish console) — no automated fetch/parser/scheduler or full queue |
+| 29    | Security/QA            | PARTIAL                    | Threat model delivered; hosted advisors, restore drill, scanner vendor and load test open                                                |
+| 30    | Production readiness   | PARTIAL                    | Go-live/YC plans delivered; staging, corpus, hosted keys and deploy authorization open                                                   |
 
 ## Summary
 
 - **8 phases** — code integrated, local gates pass, VERIFIED pending hosted acceptance/corpus
 - **5 phases** — code merged from branches/PRs, requires merge rebase confirmation + acceptance
-- **4 phases** — new development or separate audit required (07, 11, 29, 30)
+- **4 phases** — audit/planning deliverables now written (01, 02, 03, 07); 29/30 have plans but verification open; 11 remains the largest code gap
 - **1 phase** (Phase 23) — integration completed locally; hosted two-account acceptance is the single remaining gate (requires `NEXT_PUBLIC_SUPABASE_*` env keys)
 - **Phase 05** — VERIFIED (independent UI/visual evidence exists)
-- **Phases 01–04/06** — foundation/landing; PARTIAL with cloud REST/Supabase access blocked in workspace
+- **Phases 04/06** — foundation/landing; PARTIAL with cloud REST/Supabase access blocked in workspace
 
 ## Immediate Next Steps (in order)
 

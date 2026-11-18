@@ -45,9 +45,14 @@ A phase may be declared complete only when ALL of the following pass locally:
 
 ```bash
 npm run check          # prettier --check && eslint . --max-warnings=0 && next typegen && tsc --noEmit && vitest run tests/unit tests/integration && next build
-npm audit --audit-level=high   # must be 0 vulnerabilities
+npm audit --omit=dev --audit-level=high   # runtime dependencies: must be 0
 npm run test:journey-ui         # must pass (34 tests, deadlines + profile, @a11y)
 ```
+
+Full `npm audit` is reviewed separately: a dev-only advisory with no published
+patch may be accepted only when documented in `docs/SECURITY_ADVISORIES.md`
+(current: GHSA-fc5q-39xc-vjpf picomatch, upstream patch pending). Any
+high/critical advisory in runtime dependencies blocks release.
 
 Additional gate per phase:
 
@@ -128,16 +133,22 @@ A phase closure report must include:
 4. Outstanding gates (with exact remediation steps).
 5. Next phase recommendation with priority.
 
-## 8. Current State Snapshot (2026-11-17)
+## 8. Current State Snapshot (2026-11-18)
 
-- Integrated branch: `codex/mvp-closure-integration` @ `85178ad`.
+- Integrated branch: `codex/mvp-closure-integration` (security baseline intact).
 - Merged: Phase 16.5, 17, 18, 19 + catalog review/publish slice; security upgrade
   (Next.js 16.4.6, typescript-eslint 8.73.0, ESLint 10.15.0).
-- Local gates: all pass; audit clean; journey tests 34/34.
+- Local gates: all pass; runtime audit clean (`npm audit --omit=dev` = 0); full
+  audit has one documented dev-only picomatch advisory with no patch; journey
+  tests 34/34.
+- Audit deliverables written: Phase 01 `PITCH_TRACEABILITY.md`, Phase 02 `PRD.md`,
+  Phase 03 `PHASE_03_ARCHITECTURE.md`, Phase 07 `IA_MOBILE_A11Y_AUDIT.md`,
+  Phase 29 `THREAT_MODEL.md`, Phase 30 `GO_LIVE.md` + `YC_READINESS.md`.
 - Phase 23 remains PARTIAL: hosted two-account acceptance is the single open gate.
 - Phase 11/28 remain PARTIAL: full editorial pipeline / ops not complete.
 - Phase 13: code rebased, real data + acceptance open.
 - Phase 04, 06, 08, 09, 10, 12, 15, 16: PARTIAL / UNVERIFIED pending external gates.
+- Phases 20–22, 24–27: not started (major product/AI scope, provider configuration).
 
 ## 9. 17-Phase MVP Gap Summary (P0 closure order)
 
