@@ -1,3 +1,42 @@
+# MVP closure checkpoint — 2026-11-18
+
+**Read this first, then `PHASE_TRACKER.md`, `AGENT_OPERATING_PROTOCOL.md`,
+`MVP_GAP_ANALYSIS.md` and the exact phase docs.**
+
+Branch `codex/mvp-closure-integration` (pushed; remote head `255de52`) merges the
+Phase 16.5/17/18/19 stack and the catalog review/publish slice onto the Phase 23
+line. Local gates: `npm run check` green (format, ESLint, strict TS, 262
+unit/integration, production build); `npm audit --omit=dev` = 0; 34/34 journey
+UI/a11y cases. Full `npm audit` has one documented dev-only picomatch advisory
+with no upstream patch — see `SECURITY_ADVISORIES.md`.
+
+New in this checkpoint: Phase 01 `PITCH_TRACEABILITY.md`, Phase 02 `PRD.md`,
+Phase 03 `PHASE_03_ARCHITECTURE.md`, Phase 07 `IA_MOBILE_A11Y_AUDIT.md`,
+Phase 29 `THREAT_MODEL.md`, Phase 30 `GO_LIVE.md` + `YC_READINESS.md`.
+Phases 01–03 are IMPLEMENTED_AND_TESTED; 07 is IMPLEMENTED (NOT VERIFIED);
+29–30 are PARTIAL.
+
+**Next actions (in order):**
+
+1. Hosted two-account Phase 23 acceptance. Requires `.env.local` with
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+   `SUPABASE_SECRET_KEY`. Run PR #13 acceptance steps; do not mark VERIFIED from
+   fixtures.
+2. Real reviewed catalog corpus + editorial review; then Phase 12/13/15/16/23
+   hosted gates.
+3. Phase 11 remaining code: automated source-check scheduler/queue, parser
+   staging, reviewer workflow. No SQL migration may be merged without executable
+   DB replay evidence.
+4. Phase 13: rebase scholarship explorer/editor/API from
+   `origin/codex/phase13-scholarships`; requires DB verification.
+5. Phases 20–22, 24–27: not started; require provider configuration and separate
+   product scope. Do not claim them.
+
+Never fabricate acceptance, never publish unverified rows, never deploy to
+production without explicit authorization.
+
+---
+
 # Phase 23 final release checkpoint — 2026-11-06
 
 Phase23 is implemented and remains PARTIAL only where acceptance is unproven.
