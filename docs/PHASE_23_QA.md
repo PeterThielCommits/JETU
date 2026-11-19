@@ -1,10 +1,10 @@
 # Phase 23 QA / release evidence — 2026-11-06
 
 Status: IMPLEMENTED_AND_TESTED. The 2026-11-18 hosted authenticated
-acceptance below closed the browser gate; the deadline-change reschedule UI and
-email channel remain open. Phase 24 is not started. Source baseline: remote main
-`5c30fe0`; scoped branch `codex/phase-23-deadlines`. No unrelated changes
-existed at the start.
+acceptance and the 2026-11-19 reschedule probe closed the browser gate; the
+email channel and an official source-change hosted replay remain open. Phase 24
+is not started. Source baseline: remote main `5c30fe0`; scoped branch
+`codex/phase-23-deadlines`. No unrelated changes existed at the start.
 
 ## 2026-11-18 hosted authenticated acceptance
 
@@ -27,6 +27,15 @@ address under `next start`. It now uses `hasSameOrigin` and has a regression
 test. It also fixed preferences save, which used an upsert requiring
 table-level `UPDATE` against column-only grants. Details and exact results:
 [PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md](PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md).
+
+### 2026-11-19 reschedule probe
+
+A follow-up hosted probe passed 7/7 checks. A personal date created through the
+UI produced only the non-past `T−7`/`T−1` reminder jobs (no backfill); two cron
+runs produced no duplicates and no premature receipts; editing the date through
+the details dialog changed the revision, canceled both queued jobs of the old
+revision, and the next cron run created `T−14`, `T−7` and `T−1` reminders for
+the new date. The temporary account was deleted.
 
 ## Verified
 
@@ -85,8 +94,8 @@ this failure is not counted as a passed gate. Final serial results follow.
 - Email/push have no provider, remain visibly unavailable and never queue work.
 - Delivery schedules are per-message windows, not consolidated email digests.
 - No OAuth is enabled. ICS is the supported external calendar path.
-- A deadline source change reschedule is covered by SQL/worker tests but has no
-  hosted UI acceptance yet.
+- A personal-date reschedule passed a hosted UI probe. An official deadline
+  source change still has SQL/worker coverage but no hosted UI replay.
 - Earlier phase/editorial coverage is unchanged. Missing application/roadmap UI
   is not exposed as supported navigation; canonical existing data is integrated.
 

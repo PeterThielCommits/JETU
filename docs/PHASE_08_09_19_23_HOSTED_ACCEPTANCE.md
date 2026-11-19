@@ -42,6 +42,43 @@ The hosted cron worker had already produced `notification_worker_runs` rows
 before this run; the staged job was delivered by the real schedule, not by a
 local call to the worker function.
 
+## Follow-up reschedule probe — 2026-11-19
+
+A second hosted probe passed **7/7** checks with one disposable account and the
+real cron worker:
+
+- a personal date created through the UI at `2026-12-02` produced only the
+  non-past `T−7` and `T−1` reminder jobs; past `T−30`/`T−14` leads were not
+  backfilled;
+- two consecutive worker runs produced no duplicate `(revision, lead)` jobs and
+  no receipts before the planned times;
+- editing the date through the details dialog and edit form changed the
+  revision (`b086b6cd…` → `064c90b2…`) and the stored date to `2026-12-09`;
+- all queued jobs for the old revision became `canceled`;
+- the next worker run created exactly three reminders for the new revision
+  (`T−14`, `T−7`, `T−1`) with planned times shifted to the new date.
+
+The temporary account was deleted afterwards. This covers personal-date
+rescheduling; an official deadline source change still has SQL/worker coverage
+but no hosted UI run.
+
+## Follow-up RLS and role probe — 2026-11-19
+
+A separate hosted probe with two disposable accounts passed **8/8** checks:
+
+- owner profile insert (201) and version bump (200);
+- second account reading the first account's profile returned 0 rows;
+- second account reading the first account's version history returned 0 rows;
+- second account PATCHing the first account's profile left version 2 and the
+  original document untouched;
+- a self-granted `catalog_editor_memberships` insert was denied (403);
+- the non-member's own membership list was empty;
+- the non-member's authenticated `GET /api/admin/catalog` returned 403.
+
+Both temporary accounts were deleted. This closes the role-spoof and cross-user
+profile-read parts of the Phase 08 exit test. The email-confirmation signup path
+and OAuth (external) remain open.
+
 ## Defects found and fixed during acceptance
 
 1. **Every same-origin deadline write returned 403.** `POST /api/deadlines`

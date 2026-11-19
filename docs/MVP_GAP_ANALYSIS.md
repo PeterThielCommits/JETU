@@ -29,16 +29,16 @@ still gate 04/06/10/12/15/16/19/23.
 
 These 8 phases have implementation code merged onto the Phase 23 line. Local checks pass; the gate to VERIFIED is real hosted acceptance or reviewed corpus.
 
-| Phase | Title               | Status                 | Gap to VERIFIED                                                                                 |
-| ----- | ------------------- | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| 04    | Foundation          | PARTIAL                | Full local Supabase-steck, cloud REST proofs; no Docker in workspace                            |
-| 06    | Landing/SEO         | PARTIAL                | Pricing/mentors/corpus real-data gates; no deployed pricing API                                 |
-| 08    | Auth/RLS            | IMPLEMENTED_AND_TESTED | Hosted two-account Auth + isolation passed; role-spoof/editor and email-confirmation flows open |
-| 09    | Profile             | IMPLEMENTED_AND_TESTED | Hosted save/version/reload passed; delete and eligibility-impact display open                   |
-| 10    | Canonical DB        | UNVERIFIED             | Phase gate acceptance not rechecked with live cloud SQL                                         |
-| 12    | Program Explorer    | PARTIAL                | Real reviewed corpus; REST proxy 403; no end-to-end E2E from workspace                          |
-| 15    | Search/save/compare | PARTIAL                | Live corpus/REST/deploy gates; 10k benchmark passed locally only                                |
-| 16    | Matching            | PARTIAL                | Zero live program/scholarship rows; no hosted Auth/REST E2E                                     |
+| Phase | Title               | Status                 | Gap to VERIFIED                                                                                              |
+| ----- | ------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 04    | Foundation          | PARTIAL                | Full local Supabase-steck, cloud REST proofs; no Docker in workspace                                         |
+| 06    | Landing/SEO         | PARTIAL                | Pricing/mentors/corpus real-data gates; no deployed pricing API                                              |
+| 08    | Auth/RLS            | IMPLEMENTED_AND_TESTED | Hosted two-account Auth + isolation passed; role-membership denial passed; email-confirmation and OAuth open |
+| 09    | Profile             | IMPLEMENTED_AND_TESTED | Hosted save/version/reload passed; delete and eligibility-impact display open                                |
+| 10    | Canonical DB        | UNVERIFIED             | Phase gate acceptance not rechecked with live cloud SQL                                                      |
+| 12    | Program Explorer    | PARTIAL                | Real reviewed corpus; REST proxy 403; no end-to-end E2E from workspace                                       |
+| 15    | Search/save/compare | PARTIAL                | Live corpus/REST/deploy gates; 10k benchmark passed locally only                                             |
+| 16    | Matching            | PARTIAL                | Zero live program/scholarship rows; no hosted Auth/REST E2E                                                  |
 
 These 5 phases have code on branches/PRs that were merged/rebased into the integration branch. The code is present but requires confirmation that the merged version functions correctly.
 
@@ -64,7 +64,7 @@ These 4 phases require new development, separate audits, or infrastructure that 
 - **8 phases** — code integrated, local gates pass, VERIFIED pending reviewed corpus/scanner/restore
 - **5 phases** — code merged from branches/PRs, requires merge rebase confirmation + acceptance
 - **4 phases** — audit/planning deliverables now written (01, 02, 03, 07); 29/30 have plans but verification open; 11 remains the largest code gap
-- **Phase 23** — hosted two-account acceptance passed (26/26); remaining gate is deadline-change reschedule UI + email channel
+- **Phase 23** — hosted two-account acceptance and personal-date reschedule passed (26/26 + 7/7); remaining gates are official source-change hosted replay and the email channel
 - **Phase 05** — VERIFIED (independent UI/visual evidence exists)
 - **Phases 04/06** — foundation/landing; PARTIAL with cloud REST/Supabase access blocked in workspace
 
