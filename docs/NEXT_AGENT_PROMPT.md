@@ -3,27 +3,40 @@
 **Read this first, then `PHASE_TRACKER.md`, `AGENT_OPERATING_PROTOCOL.md`,
 `MVP_GAP_ANALYSIS.md` and the exact phase docs.**
 
-Branch `codex/mvp-closure-integration` (pushed; remote head `255de52`) merges the
-Phase 16.5/17/18/19 stack and the catalog review/publish slice onto the Phase 23
-line. Local gates: `npm run check` green (format, ESLint, strict TS, 262
-unit/integration, production build); `npm audit --omit=dev` = 0; 34/34 journey
-UI/a11y cases. Full `npm audit` has one documented dev-only picomatch advisory
-with no upstream patch — see `SECURITY_ADVISORIES.md`.
+Branch `codex/mvp-closure-integration` (pushed) merges the Phase 16.5/17/18/19
+stack and the catalog review/publish slice onto the Phase 23 line. Local gates:
+`npm run check` green (format, ESLint, strict TS, **265** unit/integration,
+production build); full `npm run test:e2e` **106/106**; `npm audit --omit=dev` = 0.
+Full `npm audit` has one documented dev-only picomatch advisory with no upstream
+patch — see `SECURITY_ADVISORIES.md`.
 
-New in this checkpoint: Phase 01 `PITCH_TRACEABILITY.md`, Phase 02 `PRD.md`,
-Phase 03 `PHASE_03_ARCHITECTURE.md`, Phase 07 `IA_MOBILE_A11Y_AUDIT.md`,
+**2026-11-18 hosted acceptance completed:** with real development-project keys, a
+production build passed **26/26** two-account browser/REST checks. Evidence and
+procedure: `PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md`. Phases 08, 09, 19 and 23 are
+now IMPLEMENTED_AND_TESTED. Two real defects were fixed with regression tests:
+
+- every same-origin `POST /api/deadlines` returned 403 because the route compared
+  `Origin` with `request.url`, which contains the `0.0.0.0` bind address under
+  `next start`; it now uses `hasSameOrigin` (Host + forwarded proto);
+- preferences save used a PostgREST upsert that needs table-level `UPDATE`
+  against column-only grants; it now updates first and inserts only when missing.
+
+New in the previous checkpoint: Phase 01 `PITCH_TRACEABILITY.md`, Phase 02
+`PRD.md`, Phase 03 `PHASE_03_ARCHITECTURE.md`, Phase 07 `IA_MOBILE_A11Y_AUDIT.md`,
 Phase 29 `THREAT_MODEL.md`, Phase 30 `GO_LIVE.md` + `YC_READINESS.md`.
-Phases 01–03 are IMPLEMENTED_AND_TESTED; 07 is IMPLEMENTED (NOT VERIFIED);
-29–30 are PARTIAL.
+Phases 01–03 and 08/09/19/23 are IMPLEMENTED_AND_TESTED; 07 is IMPLEMENTED
+(NOT VERIFIED); 29–30 are PARTIAL.
 
 **Next actions (in order):**
 
-1. Hosted two-account Phase 23 acceptance. Requires `.env.local` with
-   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
-   `SUPABASE_SECRET_KEY`. Run PR #13 acceptance steps; do not mark VERIFIED from
-   fixtures.
-2. Real reviewed catalog corpus + editorial review; then Phase 12/13/15/16/23
-   hosted gates.
+1. Close the remaining Phase 19/23 gaps: configure a trusted malware scanner
+   (upload release remains blocked without it), run a Vault backup/restore drill,
+   add a hosted deadline-change reschedule UI check, and configure Resend for
+   email. Do not mark those phases VERIFIED before those run.
+2. Real reviewed catalog corpus + editorial review; then Phase 12/13/15/16
+   hosted gates. The development catalog currently has only two published
+   verified entities (an opportunity and a deadline), zero published programs or
+   scholarships.
 3. Phase 11 remaining code: automated source-check scheduler/queue, parser
    staging, reviewer workflow. No SQL migration may be merged without executable
    DB replay evidence.

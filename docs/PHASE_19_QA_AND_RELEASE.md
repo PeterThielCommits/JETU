@@ -1,12 +1,23 @@
 # Phase 19 QA and release — 2026-10-27
 
-**PARTIAL. No production promotion; Phase 20 untouched.**
+**PARTIAL — hosted upload/quarantine and cross-user denial verified; trusted
+scanner, backup/restore and production promotion remain open.**
 
 Branch `codex/phase19-document-vault`, based on `00b0be6` / draft PR #4.
 Implementation and corrective commits: `33042da`, `f935617`, `a916e70`, **`472fe5e`**.
 Draft PR [#5](https://github.com/roadtoabroad346-commits/JETU/pull/5) remains stacked
 on #4, which remains stacked on #3/#2. Remote source SHA was verified after push.
 No unrelated branch was merged or force-pushed.
+
+## 2026-11-18 hosted development acceptance
+
+A production build connected to the real development project passed 26/26
+two-account checks. The Vault subset: a text essay uploaded through the real
+Vault form entered `quarantined`; the `vault_documents` row persisted; a
+signed-in second account requesting the file by version id through
+`/api/vault/file` received **404**. No document was released because no trusted
+malware scanner is configured, so download and attachment remain blocked.
+Details: [PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md](PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md).
 
 ## Verified release checks
 

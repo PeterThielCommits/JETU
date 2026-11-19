@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createRequestSupabaseClient } from '@/lib/supabase/request';
 import { errorResponse, successResponse } from '@/server/http';
+import { hasSameOrigin } from '@/features/roadmap/http';
 import { loadDeadlineWorkspace } from '@/features/deadlines/service';
 import {
   customEventSchema,
@@ -75,13 +76,7 @@ export async function GET(request?: Request) {
   }
 }
 export async function POST(request: Request) {
-  try {
-    const origin = request.headers.get('origin');
-    if (!origin || new URL(origin).host !== new URL(request.url).host)
-      return errorResponse('FORBIDDEN');
-  } catch {
-    return errorResponse('FORBIDDEN');
-  }
+  if (!hasSameOrigin(request)) return errorResponse('FORBIDDEN');
   if (!request.headers.get('content-type')?.startsWith('application/json'))
     return errorResponse('VALIDATION_FAILED');
   let raw: unknown;
@@ -102,10 +97,22 @@ export async function POST(request: Request) {
     const user_id = data.user.id;
     const c = parsed.data;
     if (c.action === 'preferences') {
-      const { error } = await client
+      // Column-level grants make a PostgREST upsert require table-level UPDATE.
+      // The preferences row is created by the signup trigger; update it first
+      // and fall back to an owner insert only for missing legacy rows.
+      const { data: updated, error: updateError } = await client
         .from('notification_preferences')
-        .upsert({ user_id, ...c.value });
-      if (error) return errorResponse('INTERNAL_ERROR');
+        .update(c.value)
+        .eq('user_id', user_id)
+        .select('user_id')
+        .maybeSingle();
+      if (updateError) return errorResponse('INTERNAL_ERROR');
+      if (!updated) {
+        const { error: insertError } = await client
+          .from('notification_preferences')
+          .insert({ user_id, ...c.value });
+        if (insertError) return errorResponse('INTERNAL_ERROR');
+      }
     } else if (c.action === 'event') {
       const { id, version, ...value } = c.value;
       if (id) {

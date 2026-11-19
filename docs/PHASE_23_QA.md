@@ -1,8 +1,32 @@
 # Phase 23 QA / release evidence — 2026-11-06
 
-Status: PARTIAL pending real authenticated hosted browser acceptance. Phase 24
-is not started. Source baseline: remote main `5c30fe0`; scoped branch
-`codex/phase-23-deadlines`. No unrelated changes existed at the start.
+Status: IMPLEMENTED_AND_TESTED. The 2026-11-18 hosted authenticated
+acceptance below closed the browser gate; the deadline-change reschedule UI and
+email channel remain open. Phase 24 is not started. Source baseline: remote main
+`5c30fe0`; scoped branch `codex/phase-23-deadlines`. No unrelated changes
+existed at the start.
+
+## 2026-11-18 hosted authenticated acceptance
+
+A production build connected to the real development project passed 26/26
+two-account checks. The Phase 23 subset:
+
+- personal date created through the real calendar UI, visible after a full
+  reload and present in the private workspace API;
+- notification preferences saved through the app API and still present after
+  reload (`Asia/Almaty`);
+- one job staged for that event was delivered by the hosted cron worker as one
+  in-app notification, then marked read and archived;
+- authenticated ICS export returned `BEGIN:VCALENDAR` with the event;
+- the second account saw zero matching calendar events and zero matching inbox
+  rows.
+
+The same run found and fixed a 403 on every same-origin deadline write: the
+route compared `Origin` with `request.url`, which carries the `0.0.0.0` bind
+address under `next start`. It now uses `hasSameOrigin` and has a regression
+test. It also fixed preferences save, which used an upsert requiring
+table-level `UPDATE` against column-only grants. Details and exact results:
+[PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md](PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md).
 
 ## Verified
 
@@ -61,9 +85,8 @@ this failure is not counted as a passed gate. Final serial results follow.
 - Email/push have no provider, remain visibly unavailable and never queue work.
 - Delivery schedules are per-message windows, not consolidated email digests.
 - No OAuth is enabled. ICS is the supported external calendar path.
-- Hosted login → create/edit → reload → notification read/preferences → scoped
-  export and two-account browser acceptance are not proven. SQL RLS evidence
-  does not substitute for these browser flows.
+- A deadline source change reschedule is covered by SQL/worker tests but has no
+  hosted UI acceptance yet.
 - Earlier phase/editorial coverage is unchanged. Missing application/roadmap UI
   is not exposed as supported navigation; canonical existing data is integrated.
 

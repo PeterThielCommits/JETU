@@ -6,11 +6,20 @@ export function hasSameOrigin(request: Request) {
   const origin = request.headers.get('origin');
   try {
     const parsed = origin ? new URL(origin) : null;
-    const requestUrl = new URL(request.url);
+    // `request.url` carries the server bind address under `next start
+    // --hostname 0.0.0.0`, not the public host. Compare against the Host
+    // header instead, and honour the forwarded protocol of a TLS proxy.
+    const forwardedProto = request.headers
+      .get('x-forwarded-proto')
+      ?.split(',')[0]
+      ?.trim();
+    const protocol = forwardedProto
+      ? `${forwardedProto}:`
+      : new URL(request.url).protocol;
     return Boolean(
       parsed &&
       parsed.host === request.headers.get('host') &&
-      parsed.protocol === requestUrl.protocol,
+      parsed.protocol === protocol,
     );
   } catch {
     return false;
