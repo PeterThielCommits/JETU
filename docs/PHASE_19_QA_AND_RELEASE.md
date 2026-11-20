@@ -1,7 +1,8 @@
 # Phase 19 QA and release — 2026-10-27
 
-**PARTIAL — hosted upload/quarantine and cross-user denial verified; trusted
-scanner, backup/restore and production promotion remain open.**
+**PARTIAL — hosted upload/quarantine, ClamAV release/rejection and cross-user
+denial verified; backup/restore, production scanner hosting and production
+promotion remain open.**
 
 Branch `codex/phase19-document-vault`, based on `00b0be6` / draft PR #4.
 Implementation and corrective commits: `33042da`, `f935617`, `a916e70`, **`472fe5e`**.
@@ -18,6 +19,19 @@ signed-in second account requesting the file by version id through
 `/api/vault/file` received **404**. No document was released because no trusted
 malware scanner is configured, so download and attachment remain blocked.
 Details: [PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md](PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md).
+
+### 2026-11-20 ClamAV worker run
+
+ClamAV 1.5.5 with database 28189 (2026-11-20) was installed locally. The real
+`scripts/vault-worker.mjs` released a clean quarantined text file as
+`available` and recorded the scanner string. EICAR was blocked by host Windows
+Defender before ClamAV could read the temporary file, so the rejected path was
+exercised with a temporary controlled `.ndb` signature
+(`Win.Test.JetuAcceptance.UNOFFICIAL`) and then the signature was removed.
+Direct Storage isolation passed 5/5: anonymous and cross-user object reads and
+cross-user signed-URL requests returned 400; cross-user metadata rows were
+empty. The temporary user and all objects were deleted. This proves the worker
+release/reject control flow, not production scanner hosting or a backup drill.
 
 ## Verified release checks
 

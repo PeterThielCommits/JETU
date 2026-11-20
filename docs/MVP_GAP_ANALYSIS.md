@@ -47,7 +47,7 @@ These 5 phases have code on branches/PRs that were merged/rebased into the integ
 | 13    | Scholarships     | BACKLOG (code rebased)     | UI/editor/API rebased onto `main`; real scholarship data and acceptance required                                                             |
 | 17    | Roadmap          | IMPLEMENTED (NOT VERIFIED) | Roadmap engine integrated; hosted two-user/data acceptance open (see PHASE_17_QA.md)                                                         |
 | 18    | Application CRM  | IMPLEMENTED (NOT VERIFIED) | Application portfolio, state machines, checklist integrated; hosted acceptance open                                                          |
-| 19    | Document Vault   | IMPLEMENTED_AND_TESTED     | Hosted upload→quarantine + cross-user 404 passed; scanner release, backup/restore and mentor sharing open                                    |
+| 19    | Document Vault   | IMPLEMENTED_AND_TESTED     | Hosted ClamAV release/reject + cross-user Storage denial passed; backup/restore, production scanner host and mentor sharing open             |
 | 28    | Admin publishing | PARTIAL                    | Catalog review/publish console with reviewer roles and audit integrated; editing, role management, support/abuse and broader ops remain open |
 
 These 4 phases require new development, separate audits, or infrastructure that is not yet present in the codebase (statuses updated 2026-11-18 where noted).

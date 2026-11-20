@@ -79,6 +79,33 @@ Both temporary accounts were deleted. This closes the role-spoof and cross-user
 profile-read parts of the Phase 08 exit test. The email-confirmation signup path
 and OAuth (external) remain open.
 
+## ClamAV worker acceptance — 2026-11-20
+
+A local ClamAV worker was installed and exercised against the hosted development
+project:
+
+- ClamAV 1.5.5 installed with `winget`; `freshclam` downloaded database 28189
+  dated 2026-11-20; the copied worker runtime resolves `clamscan` from PATH.
+- A clean text essay uploaded through the Vault UI stayed quarantined until
+  `node scripts/vault-worker.mjs` ran; it then became **available** with
+  `scanner = ClamAV 1.5.5/28189/Fri Nov 20 11:29:13 2026`.
+- The EICAR test string was blocked by the host's Windows Defender before
+  ClamAV could open the temporary file (exit 2), so it could not exercise the
+  infected path. A controlled ClamAV `.ndb` signature
+  (`Win.Test.JetuAcceptance.UNOFFICIAL`) on a marker text file was used
+  instead: the worker marked it **rejected** and recorded the same scanner
+  string. The custom signature file was removed immediately after the test.
+  The EICAR fixture remained quarantined and was deleted with the test user.
+- Direct Storage isolation passed **5/5**: anonymous direct object read 400,
+  cross-user direct read 400, cross-user signed-URL request 400, and
+  cross-user `vault_versions`/`vault_documents` rows returned empty.
+- The temporary user and all three uploaded objects were deleted.
+
+The worker is a trusted private process using `SUPABASE_SECRET_KEY`; it needs a
+host with fresh ClamAV definitions and no public inbound port. A Vault
+backup/restore drill, production scanner hosting and the Phase 22 mentor-share
+revocation path remain open.
+
 ## Defects found and fixed during acceptance
 
 1. **Every same-origin deadline write returned 403.** `POST /api/deadlines`
@@ -96,9 +123,10 @@ and OAuth (external) remain open.
 
 ## Explicit limits
 
-- No trusted malware scanner is configured. Uploads stay in quarantine and
-  cannot be downloaded or attached; no document was released. Phase 19 remains
-  short of its scanner/release gate.
+- A local Windows ClamAV worker released a clean file and rejected a controlled
+  test signature. EICAR was blocked by the host's Defender before ClamAV could
+  read it, so the infected-path test used a temporary synthetic signature.
+  Production scanner hosting and a Vault backup/restore drill remain open.
 - Email and push channels have no provider; only in-app delivery is proven.
   Phase 23 email acceptance remains open.
 - No OAuth provider is enabled.
