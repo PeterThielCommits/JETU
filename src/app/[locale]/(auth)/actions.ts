@@ -44,7 +44,11 @@ export async function submitSignIn(
   } catch {
     return { status: 'error', error: 'unavailable' };
   }
-  redirect(authUrl(locale, 'dashboard'));
+  const rawInvite = String(formData.get('inviteToken') ?? '');
+  const invite = /^[a-f0-9]{64}$/.test(rawInvite) ? `#invite=${rawInvite}` : '';
+  redirect(
+    invite ? authUrl(locale, 'vault') + invite : authUrl(locale, 'dashboard'),
+  );
 }
 
 export async function submitSignUp(
@@ -61,7 +65,7 @@ export async function submitSignUp(
         ? ['terms']
         : parsed.error.issues.map((issue) => String(issue.path[0])),
     };
-  let signedIn = false;
+  let sessionCreated: boolean;
   try {
     const supabase = await createRequestSupabaseClient();
     const callback = new URL(
@@ -91,11 +95,11 @@ export async function submitSignUp(
         status: 'error',
         error: error.status === 429 ? 'rate' : 'unavailable',
       };
-    signedIn = Boolean(data.session);
+    sessionCreated = Boolean(data.session);
   } catch {
     return { status: 'error', error: 'unavailable' };
   }
-  if (signedIn) redirect(authUrl(locale, 'onboarding'));
+  if (sessionCreated) redirect(authUrl(locale, 'onboarding'));
   return { status: 'check-email' };
 }
 

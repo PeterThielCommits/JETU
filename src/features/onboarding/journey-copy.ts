@@ -110,6 +110,14 @@ const ru = {
   matching: 'Перейти к подбору',
   explore: 'Изучить каталог',
   editAgain: 'Изменить профиль',
+  deleteProfile: 'Удалить профиль',
+  deleteWarning:
+    'Профиль и вся история версий будут удалены без возможности восстановления. Это не удаляет аккаунт.',
+  deleteConfirm: 'Удалить навсегда',
+  deleteCancel: 'Отмена',
+  deleteClose: 'Закрыть',
+  deletedNotice: 'Профиль и история версий удалены. Можно начать заново.',
+  deleteFailed: 'Не удалось удалить профиль. Попробуй ещё раз.',
   savedNote:
     'Подбор зависит от опубликованных данных и не гарантирует поступление или финансирование.',
   invalid:
@@ -269,6 +277,14 @@ const en: typeof ru = {
   matching: 'Find my fit',
   explore: 'Explore the catalog',
   editAgain: 'Edit my profile',
+  deleteProfile: 'Delete my profile',
+  deleteWarning:
+    'This removes the profile and all saved versions without recovery. It does not delete your account.',
+  deleteConfirm: 'Delete permanently',
+  deleteCancel: 'Cancel',
+  deleteClose: 'Close',
+  deletedNotice: 'Profile and version history deleted. You can start again.',
+  deleteFailed: 'Could not delete the profile. Please try again.',
   savedNote:
     'Matching depends on published information and does not guarantee admission or funding.',
   invalid: 'Check the highlighted answers. Your other entries are still here.',
@@ -426,6 +442,14 @@ const kk: typeof ru = {
   matching: 'Іріктеуге өту',
   explore: 'Каталогты зерттеу',
   editAgain: 'Профильді өзгерту',
+  deleteProfile: 'Профильді жою',
+  deleteWarning:
+    'Профиль және барлық сақталған нұсқалар қайтарылмайтындай жойылады. Бұл аккаунтты жоймайды.',
+  deleteConfirm: 'Біржола жою',
+  deleteCancel: 'Болдырмау',
+  deleteClose: 'Жабу',
+  deletedNotice: 'Профиль және нұсқалар тарихы жойылды. Қайта бастауға болады.',
+  deleteFailed: 'Профильді жою мүмкін болмады. Қайталап көр.',
   savedNote:
     'Іріктеу жарияланған деректерге тәуелді және оқуға түсуге не қаржыландыруға кепілдік бермейді.',
   invalid: 'Белгіленген жауаптарды тексер. Басқа деректерің осында қалды.',

@@ -93,6 +93,19 @@ export async function submitProfile(
   }
 }
 
+export async function deleteProfile(formData: FormData) {
+  const locale = localeOf(formData);
+  const supabase = await createRequestSupabaseClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) redirect(`/${locale}/login`);
+  const { error: deleteError } = await supabase
+    .from('student_profiles')
+    .delete()
+    .eq('user_id', data.user.id);
+  if (deleteError) redirect(`/${locale}/onboarding?error=delete`);
+  redirect(`/${locale}/onboarding?deleted=1`);
+}
+
 /** Existing form contract retained for links and clients from the previous release. */
 export async function saveProfile(formData: FormData) {
   const locale = localeOf(formData);

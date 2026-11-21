@@ -1,3 +1,117 @@
+# MVP closure checkpoint — 2026-11-21
+
+**Read this first, then `PHASE_TRACKER.md`, `AGENT_OPERATING_PROTOCOL.md`,
+`MVP_GAP_ANALYSIS.md` and the exact phase docs. For the no-custom-domain path,
+read `NO_DOMAIN_FULL_GUIDE.md`.**
+
+Branch `codex/mvp-closure-integration` (pushed) merges the Phase 16.5/17/18/19
+stack and the catalog review/publish slice onto the Phase 23 line. Local gates:
+`npm run check` green (format, ESLint, strict TS, **268** unit/integration,
+production build); full `npm run test:e2e` **106/106**; journey UI **35/35**;
+`npm audit --omit=dev` = 0.
+Full `npm audit` has one documented dev-only picomatch advisory with no upstream
+patch — see `SECURITY_ADVISORIES.md`.
+
+**2026-11-18 hosted acceptance completed:** with real development-project keys, a
+production build passed **26/26** two-account browser/REST checks. Evidence and
+procedure: `PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md`. Phases 08, 09, 19 and 23 are
+now IMPLEMENTED_AND_TESTED. Two real defects were fixed with regression tests:
+
+- every same-origin `POST /api/deadlines` returned 403 because the route compared
+  `Origin` with `request.url`, which contains the `0.0.0.0` bind address under
+  `next start`; it now uses `hasSameOrigin` (Host + forwarded proto);
+- preferences save used a PostgREST upsert that needs table-level `UPDATE`
+  against column-only grants; it now updates first and inserts only when missing.
+
+New in the previous checkpoint: Phase 01 `PITCH_TRACEABILITY.md`, Phase 02
+`PRD.md`, Phase 03 `PHASE_03_ARCHITECTURE.md`, Phase 07 `IA_MOBILE_A11Y_AUDIT.md`,
+Phase 29 `THREAT_MODEL.md`, Phase 30 `GO_LIVE.md` + `YC_READINESS.md`.
+Phases 01–03 and 08/09/19/23 are IMPLEMENTED_AND_TESTED; 07 is IMPLEMENTED
+(NOT VERIFIED); 29–30 are PARTIAL. Only Phase 05 is VERIFIED.
+
+**2026-11-20/21 additional hosted evidence:** local ClamAV 1.5.5 released a clean
+quarantined Vault file, rejected a controlled signature (EICAR was blocked by
+host Windows Defender), and direct Storage isolation passed **5/5**. Profile
+deletion passed **12/12**: owner delete, cross-user delete denial, version
+history cascade and account preservation. No test users or objects remain.
+The profile delete UI is in all three locales with unit and journey coverage.
+
+**Next actions (in order):**
+
+1. Close the remaining Phase 09/19/23 gaps: implement the full account-deletion
+   workflow (mark guard, delete both Storage buckets, delete the Auth user),
+   add the eligibility-impact display, prove production scanner hosting and run
+   a Vault backup/restore drill. Do not mark those phases VERIFIED before those
+   run. Email still needs a provider and an application adapter.
+2. Real reviewed catalog corpus + editorial review; then Phase 12/13/15/16
+   hosted gates. The development catalog currently has only two published
+   verified entities (an opportunity and a deadline), zero published programs or
+   scholarships.
+3. Phase 11 remaining code: automated source-check scheduler/queue, parser
+   staging, reviewer workflow. No SQL migration may be merged without executable
+   DB replay evidence.
+4. Phase 13: rebase scholarship explorer/editor/API from
+   `origin/codex/phase13-scholarships`; requires DB verification.
+5. Phases 20–22, 24–27: not started; require provider configuration and separate
+   product scope. Do not claim them.
+
+Never fabricate acceptance, never publish unverified rows, never deploy to
+production without explicit authorization.
+
+---
+
+# Phase 23 final release checkpoint — 2026-11-06
+
+Phase23 is implemented and remains PARTIAL only where acceptance is unproven.
+Read `PHASE_23_QA.md` for all limits and exact evidence. Application source
+`30b8f829ec7eb10ad4a6370ad2b6129e78f5c0bc` is pushed in PR13 (draft); GitHub run
+42219161247 passed frontend and database, including clean replay twice and exact
+type guard. Local check150, full E2E80/4 Auth-dependent skips, UI/axe28, pgTAP101
+per replay, hosted rollback35. No fixture users remain.
+
+Both Jetuu migrations20261106122552 and20261106123401 are applied to existing
+`edpuovkgoisyzpguksdi`. Cron job2 `jetu-deadlines` succeeds every minute. Do not
+reapply/reset this hosted database. Email/push remain unavailable and no OAuth
+was enabled. Preview branch-only public config was fixed without production or
+private-key changes. Protected preview `jetu-8uaskzsaz-impact-hub.vercel.app` is
+READY for exact source30b8f82; health200, APIs401, private locale routes correctly
+redirect to login, real search RPC200. Protection remains enabled.
+
+Next acceptance action: exercise real hosted login with two test accounts,
+create/edit/reload personal dates, change preferences, persist read/archive,
+check cross-user isolation and authenticated ICS download. Do not mark VERIFIED
+from SQL fixtures or rendered component screenshots. Do not begin Phase24.
+
+This checkpoint may be a later documentation-only Git commit than source30b8f82.
+Older notes below are historical; current status is the checkpoint above.
+
+# Phase 23 checkpoint — 2026-11-06
+
+Read `docs/PHASE_23_QA.md` and `docs/DEADLINE_ENGINE.md` first. Current user scope
+explicitly authorizes Phase 23 plus existing dashboard/search polish, and scoped
+GitHub/Supabase/Vercel publication. Do not start Phase 24 or change older labels.
+
+Branch `codex/phase-23-deadlines` starts from current main `5c30fe0`. New migration
+`20261106122552_phase_23_deadlines_notifications.sql` is already applied to the
+existing Jetuu development project `edpuovkgoisyzpguksdi`; do not replay it there.
+Cron `jetu-deadlines` (job 2) is enabled every minute. Hosted rollback assertions
+35/35 pass; no test identities persist. External email/push remain unavailable.
+
+Implementation: `src/features/deadlines/`, `/api/deadlines`, `/api/calendar/export`,
+private calendar/inbox/settings/dashboard routes, search chips/advanced filters,
+owner RLS views and transactional private worker. Existing snapshots are preserved.
+Standalone PostgreSQL `jetu-phase23-db` contains disposable replay databases only;
+actual generated public types come from pinned CLI. SQL suite101, component UI28,
+unit/integration150 passed at checkpoints. Final release gate/results and links
+must be read from the QA record, not inferred from these provisional counts.
+
+Final check passes; full E2E80 pass/4 Auth-dependent skips, UI28 pass.
+PR13 is open. Next: verify follow-up preview SHA/health after proxy/config repair. Real hosted authenticated two-account browser acceptance is
+still required before VERIFIED. CLI `gh` reports an invalid GH_TOKEN; connected
+GitHub tools remain available if git push fails. Never print or retrieve secrets.
+
+Older handoff follows as historical context.
+
 # Publication handoff — 2026-11-04
 
 The user explicitly authorized GitHub/Supabase/Vercel publication after the UI

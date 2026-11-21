@@ -8,7 +8,7 @@ import {
   ProfileWizard,
   WizardSuccess,
 } from '@/features/onboarding/profile-wizard';
-import { saveProfile, submitProfile } from '../actions';
+import { saveProfile, submitProfile, deleteProfile } from '../actions';
 
 export async function generateMetadata({
   params,
@@ -28,7 +28,12 @@ export default async function OnboardingPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ view?: string; success?: string; error?: string }>;
+  searchParams: Promise<{
+    view?: string;
+    success?: string;
+    error?: string;
+    deleted?: string;
+  }>;
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) return null;
@@ -69,7 +74,10 @@ export default async function OnboardingPage({
       initial={initial}
       version={data?.version ?? 0}
       loadFailed={Boolean(error)}
+      deleted={query.deleted === '1'}
+      deleteFailed={query.error === 'delete'}
       action={submitProfile}
+      deleteAction={deleteProfile}
     />
   );
 }

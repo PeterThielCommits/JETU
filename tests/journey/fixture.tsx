@@ -37,6 +37,9 @@ const initial =
         field: 'Computer Science',
       }
     : {};
+const deleteAction = async () => {
+  await fetch('/test-delete', { method: 'POST' });
+};
 createRoot(document.getElementById('root')!).render(
   params.get('account') === '1' ? (
     <AccountExperience
@@ -48,8 +51,9 @@ createRoot(document.getElementById('root')!).render(
     <ProfileJourney
       locale={locale}
       initial={profileFormValues(initial)}
-      version={0}
+      version={params.get('delete') === '1' ? 1 : 0}
       action={action}
+      deleteAction={params.get('delete') === '1' ? deleteAction : undefined}
     />
   ),
 );

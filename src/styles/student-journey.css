@@ -525,6 +525,14 @@
 .journey-step-actions > :first-child:not(:last-child) {
   margin-right: auto;
 }
+.journey-danger {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 20px;
+}
+.journey-success .journey-danger {
+  justify-content: center;
+}
 .journey-memory {
   max-width: 650px;
   margin: 16px 8px 0;

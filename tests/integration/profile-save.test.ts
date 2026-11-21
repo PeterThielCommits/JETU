@@ -9,6 +9,7 @@ const db = vi.hoisted(() => ({
   maybeSingle: vi.fn(),
   update: vi.fn(),
   insert: vi.fn(),
+  delete: vi.fn(),
 }));
 vi.mock('@/lib/supabase/request', () => ({
   createRequestSupabaseClient: db.create,
@@ -18,7 +19,11 @@ vi.mock('next/navigation', () => ({
     throw new Error(`redirect:${url}`);
   },
 }));
-import { saveProfile, submitProfile } from '@/app/[locale]/(dashboard)/actions';
+import {
+  deleteProfile,
+  saveProfile,
+  submitProfile,
+} from '@/app/[locale]/(dashboard)/actions';
 
 function form(version = '3') {
   const values = {
@@ -55,8 +60,16 @@ beforeEach(() => {
     maybeSingle: db.maybeSingle,
     update: db.update,
     insert: db.insert,
+    delete: db.delete,
   };
-  for (const mock of [db.from, db.select, db.eq, db.update, db.insert])
+  for (const mock of [
+    db.from,
+    db.select,
+    db.eq,
+    db.update,
+    db.insert,
+    db.delete,
+  ])
     mock.mockReturnValue(query);
 });
 
@@ -145,5 +158,30 @@ describe('profile concurrency (mocked adapter, not hosted persistence)', () => {
     );
     expect(db.update).not.toHaveBeenCalled();
     expect(db.insert).not.toHaveBeenCalled();
+  });
+  it('deletes only the signed-in owner profile and reports success', async () => {
+    const data = new FormData();
+    data.set('locale', 'en');
+    await expect(deleteProfile(data)).rejects.toThrow(
+      'redirect:/en/onboarding?deleted=1',
+    );
+    expect(db.from).toHaveBeenCalledWith('student_profiles');
+    expect(db.delete).toHaveBeenCalled();
+    expect(db.eq).toHaveBeenCalledWith('user_id', 'owner');
+  });
+  it('does not delete when unauthenticated', async () => {
+    db.getUser.mockResolvedValueOnce({ data: { user: null } });
+    const data = new FormData();
+    data.set('locale', 'en');
+    await expect(deleteProfile(data)).rejects.toThrow('redirect:/en/login');
+    expect(db.delete).not.toHaveBeenCalled();
+  });
+  it('redirects with a recoverable error when the delete is refused', async () => {
+    db.eq.mockResolvedValueOnce({ error: { code: '42501' } });
+    const data = new FormData();
+    data.set('locale', 'en');
+    await expect(deleteProfile(data)).rejects.toThrow(
+      'redirect:/en/onboarding?error=delete',
+    );
   });
 });

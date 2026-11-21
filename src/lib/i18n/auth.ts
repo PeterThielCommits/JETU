@@ -5,6 +5,7 @@ export const authCopy = {
     profileConflict:
       'Анкета уже изменена в другой вкладке или на другом устройстве. Ваше сохранение отменено. Ниже загружена актуальная версия — проверьте её перед повторным редактированием.',
     signIn: 'Войти',
+    notConfigured: 'Вход недоступен в этой среде: подключение не настроено.',
     signUp: 'Создать аккаунт',
     email: 'Электронная почта',
     password: 'Пароль',
@@ -58,6 +59,7 @@ export const authCopy = {
     profileConflict:
       'Сауалнама басқа қойындыда немесе құрылғыда өзгертілді. Бұл сақтау тоқтатылды. Төменде соңғы нұсқа көрсетілген; қайта өңдемес бұрын тексеріңіз.',
     signIn: 'Кіру',
+    notConfigured: 'Бұл ортада кіру қолжетімсіз: байланыс бапталмаған.',
     signUp: 'Аккаунт ашу',
     email: 'Электрондық пошта',
     password: 'Құпиясөз',
@@ -108,6 +110,8 @@ export const authCopy = {
     profileConflict:
       'Your profile changed in another tab or device. This save was cancelled. The latest version is shown below; review it before editing again.',
     signIn: 'Sign in',
+    notConfigured:
+      'Sign-in is unavailable in this environment: the connection is not configured.',
     signUp: 'Create account',
     email: 'Email address',
     password: 'Password',
