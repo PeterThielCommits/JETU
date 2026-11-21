@@ -34,7 +34,7 @@ These 8 phases have implementation code merged onto the Phase 23 line. Local che
 | 04    | Foundation          | PARTIAL                | Hosted Auth/REST/Storage proofs pass; full local Supabase stack blocked by no Docker                         |
 | 06    | Landing/SEO         | PARTIAL                | Pricing/mentors/corpus real-data gates; no deployed pricing API                                              |
 | 08    | Auth/RLS            | IMPLEMENTED_AND_TESTED | Hosted two-account Auth + isolation passed; role-membership denial passed; email-confirmation and OAuth open |
-| 09    | Profile             | IMPLEMENTED_AND_TESTED | Hosted save/version/reload passed; delete and eligibility-impact display open                                |
+| 09    | Profile             | IMPLEMENTED_AND_TESTED | Hosted save/version/reload and owner delete/cascade passed; account deletion and eligibility impact open     |
 | 10    | Canonical DB        | UNVERIFIED             | Phase gate acceptance not rechecked with live cloud SQL                                                      |
 | 12    | Program Explorer    | PARTIAL                | Real reviewed corpus; hosted REST works; no live-data E2E                                                    |
 | 15    | Search/save/compare | PARTIAL                | Live reviewed corpus/deploy gates; 10k benchmark local only                                                  |

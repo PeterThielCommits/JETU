@@ -106,6 +106,29 @@ host with fresh ClamAV definitions and no public inbound port. A Vault
 backup/restore drill, production scanner hosting and the Phase 22 mentor-share
 revocation path remain open.
 
+## Profile deletion acceptance — 2026-11-21
+
+A hosted probe with two disposable accounts passed **12/12** checks against the
+same production build:
+
+- the owner inserted version 1 of their own profile through the authenticated
+  REST API, and the trigger created version history;
+- the second account's `DELETE` against the owner's `student_profiles` row
+  affected zero rows and the owner profile remained;
+- the second account's `DELETE` against `student_profile_versions` returned 403,
+  and the history remained;
+- the confirmation dialog's **Cancel** action closed without deleting;
+- **Delete permanently** from the real onboarding UI redirected to
+  `/en/onboarding?deleted=1` and showed the deleted notice;
+- both the profile row and its version history were empty afterwards;
+- the Auth account still existed, proving the action deletes profile data and
+  not the account;
+- both disposable accounts were removed after the run.
+
+This closes the profile-delete and history-cascade part of the Phase 09 exit
+test. A full account-deletion workflow (all private Storage objects plus the Auth
+user) and the eligibility-impact display remain open.
+
 ## Defects found and fixed during acceptance
 
 1. **Every same-origin deadline write returned 403.** `POST /api/deadlines`
@@ -127,6 +150,9 @@ revocation path remain open.
   test signature. EICAR was blocked by the host's Defender before ClamAV could
   read it, so the infected-path test used a temporary synthetic signature.
   Production scanner hosting and a Vault backup/restore drill remain open.
+- Profile deletion and version-history cascade pass hosted acceptance. Full
+  account deletion (all private Storage objects plus the Auth user) and the
+  eligibility-impact display are not implemented.
 - Email and push channels have no provider; only in-app delivery is proven.
   Phase 23 email acceptance remains open.
 - No OAuth provider is enabled.

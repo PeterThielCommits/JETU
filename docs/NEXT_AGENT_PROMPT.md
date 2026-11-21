@@ -1,12 +1,14 @@
-# MVP closure checkpoint — 2026-11-18
+# MVP closure checkpoint — 2026-11-21
 
 **Read this first, then `PHASE_TRACKER.md`, `AGENT_OPERATING_PROTOCOL.md`,
-`MVP_GAP_ANALYSIS.md` and the exact phase docs.**
+`MVP_GAP_ANALYSIS.md` and the exact phase docs. For the no-custom-domain path,
+read `NO_DOMAIN_FULL_GUIDE.md`.**
 
 Branch `codex/mvp-closure-integration` (pushed) merges the Phase 16.5/17/18/19
 stack and the catalog review/publish slice onto the Phase 23 line. Local gates:
-`npm run check` green (format, ESLint, strict TS, **265** unit/integration,
-production build); full `npm run test:e2e` **106/106**; `npm audit --omit=dev` = 0.
+`npm run check` green (format, ESLint, strict TS, **268** unit/integration,
+production build); full `npm run test:e2e` **106/106**; journey UI **35/35**;
+`npm audit --omit=dev` = 0.
 Full `npm audit` has one documented dev-only picomatch advisory with no upstream
 patch — see `SECURITY_ADVISORIES.md`.
 
@@ -25,14 +27,22 @@ New in the previous checkpoint: Phase 01 `PITCH_TRACEABILITY.md`, Phase 02
 `PRD.md`, Phase 03 `PHASE_03_ARCHITECTURE.md`, Phase 07 `IA_MOBILE_A11Y_AUDIT.md`,
 Phase 29 `THREAT_MODEL.md`, Phase 30 `GO_LIVE.md` + `YC_READINESS.md`.
 Phases 01–03 and 08/09/19/23 are IMPLEMENTED_AND_TESTED; 07 is IMPLEMENTED
-(NOT VERIFIED); 29–30 are PARTIAL.
+(NOT VERIFIED); 29–30 are PARTIAL. Only Phase 05 is VERIFIED.
+
+**2026-11-20/21 additional hosted evidence:** local ClamAV 1.5.5 released a clean
+quarantined Vault file, rejected a controlled signature (EICAR was blocked by
+host Windows Defender), and direct Storage isolation passed **5/5**. Profile
+deletion passed **12/12**: owner delete, cross-user delete denial, version
+history cascade and account preservation. No test users or objects remain.
+The profile delete UI is in all three locales with unit and journey coverage.
 
 **Next actions (in order):**
 
-1. Close the remaining Phase 19/23 gaps: configure a trusted malware scanner
-   (upload release remains blocked without it), run a Vault backup/restore drill,
-   add a hosted deadline-change reschedule UI check, and configure Resend for
-   email. Do not mark those phases VERIFIED before those run.
+1. Close the remaining Phase 09/19/23 gaps: implement the full account-deletion
+   workflow (mark guard, delete both Storage buckets, delete the Auth user),
+   add the eligibility-impact display, prove production scanner hosting and run
+   a Vault backup/restore drill. Do not mark those phases VERIFIED before those
+   run. Email still needs a provider and an application adapter.
 2. Real reviewed catalog corpus + editorial review; then Phase 12/13/15/16
    hosted gates. The development catalog currently has only two published
    verified entities (an opportunity and a deadline), zero published programs or

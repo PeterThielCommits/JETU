@@ -21,12 +21,13 @@ production, per the master constraints.
 
 ### Engineering
 
-- [x] `npm run check` green: format, lint, strict TS, 262 unit/integration, build.
+- [x] `npm run check` green: format, lint, strict TS, 268 unit/integration, build.
 - [x] `npm audit --audit-level=high` = 0.
-- [x] 34/34 journey UI/a11y cases green (fixtures, 3 locales, 3 widths).
+- [x] 35/35 journey UI/a11y cases green (fixtures, 3 locales, 3 widths).
 - [x] Production build succeeds on Next.js 16.4.6.
-- [ ] Hosted two-account Auth/RLS acceptance (blocked: no
-      `NEXT_PUBLIC_SUPABASE_*` / `SUPABASE_SECRET_KEY` in this workspace).
+- [x] Hosted two-account Auth/RLS acceptance: **26/26** plus **7/7** reschedule,
+      **8/8** role/RLS, **5/5** Storage isolation and **12/12** profile delete
+      checks against the development project.
 - [ ] Clean CI migration replay at final commit (CI environment reachable? — remote
       job status must be confirmed).
 - [ ] Generated DB types regenerated from the final hosted schema.
@@ -43,7 +44,8 @@ production, per the master constraints.
 
 - [ ] Cloud security advisors clean at release commit (previously clean, needs rerun).
 - [ ] Restore drill executed and documented.
-- [ ] Malware scanner vendor configured for vault uploads.
+- [ ] Malware scanner vendor configured for vault uploads (a local ClamAV worker
+      is proven; always-on production hosting remains open).
 - [ ] Legal review of privacy/terms for target jurisdictions.
 
 ### Operations

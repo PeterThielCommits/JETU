@@ -147,6 +147,33 @@ test('conflict keeps the current answers and offers a separate current-version l
   ).toBeVisible();
 });
 
+test('profile deletion requires explicit confirmation and is cancellable', async ({
+  page,
+}) => {
+  let deletes = 0;
+  await page.route('**/test-delete', (route) => {
+    deletes++;
+    return route.fulfill({ json: { ok: true } });
+  });
+  await page.goto('/tests/journey/fixture.html?delete=1');
+  const trigger = page.getByRole('button', {
+    name: 'Delete my profile',
+    exact: true,
+  });
+  await trigger.click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('does not delete your account');
+  await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  expect(deletes).toBe(0);
+  await trigger.click();
+  await dialog
+    .getByRole('button', { name: 'Delete permanently', exact: true })
+    .click();
+  await expect.poll(() => deletes).toBe(1);
+});
+
 test('account confirmation follows an action result and allows editing the email', async ({
   page,
 }) => {

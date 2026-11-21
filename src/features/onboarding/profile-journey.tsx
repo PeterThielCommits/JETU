@@ -26,10 +26,13 @@ type Props = {
   initial: ProfileValues;
   version: number;
   loadFailed?: boolean;
+  deleted?: boolean;
+  deleteFailed?: boolean;
   action: (
     previous: ProfileSaveState,
     data: FormData,
   ) => Promise<ProfileSaveState>;
+  deleteAction?: (data: FormData) => Promise<void>;
 };
 const fieldEmoji = ['💻', '💼', '⚙️', '🩺', '🎨', '🌍'];
 const subscribe = () => () => {};
@@ -96,7 +99,10 @@ export function ProfileJourney({
   initial,
   version,
   loadFailed = false,
+  deleted = false,
+  deleteFailed = false,
   action,
+  deleteAction,
 }: Props) {
   const t = journeyCopy[locale];
   const interactive = useSyncExternalStore(subscribe, clientReady, serverReady);
@@ -114,6 +120,7 @@ export function ProfileJourney({
   const titleRef = useRef<HTMLHeadingElement>(null);
   const errorRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const deleteDialog = useRef<HTMLDialogElement>(null);
   const moved = useRef(false);
   const [hasChanged, setHasChanged] = useState(false);
   const saved =
@@ -250,6 +257,55 @@ export function ProfileJourney({
           maximumFractionDigits: 0,
         }).format(Number(amount));
 
+  const hasProfile =
+    version > 0 || savedVersion > 0 || (state.version ?? 0) > 0;
+  function deleteControl() {
+    if (!deleteAction || !hasProfile) return null;
+    return (
+      <div className="journey-danger">
+        <button
+          className="ui-button ui-button--ghost"
+          type="button"
+          onClick={() => deleteDialog.current?.showModal()}
+        >
+          {t.deleteProfile}
+        </button>
+        <dialog
+          ref={deleteDialog}
+          className="deadline-dialog"
+          aria-labelledby="delete-profile-title"
+        >
+          <div className="deadline-panel-title">
+            <h2 id="delete-profile-title">{t.deleteProfile}</h2>
+            <button
+              className="ui-button"
+              type="button"
+              aria-label={t.deleteClose}
+              onClick={() => deleteDialog.current?.close()}
+            >
+              <Icon name="close" />
+            </button>
+          </div>
+          <p>{t.deleteWarning}</p>
+          <form action={deleteAction}>
+            <input type="hidden" name="locale" value={locale} />
+            <div className="deadline-dialog-actions">
+              <button
+                className="ui-button"
+                type="button"
+                onClick={() => deleteDialog.current?.close()}
+              >
+                {t.deleteCancel}
+              </button>
+              <button className="ui-button ui-button--primary" type="submit">
+                {t.deleteConfirm}
+              </button>
+            </div>
+          </form>
+        </dialog>
+      </div>
+    );
+  }
   if (saved)
     return (
       <main id="main" tabIndex={-1} className="journey-success page-shell">
@@ -285,6 +341,7 @@ export function ProfileJourney({
           >
             {t.editAgain}
           </button>
+          {deleteControl()}
           <p className="journey-note">{t.savedNote}</p>
         </section>
       </main>
@@ -303,6 +360,16 @@ export function ProfileJourney({
         </span>
       </aside>
       <div className="journey-workspace">
+        {deleted ? (
+          <p className="feedback-box feedback-box--success" role="status">
+            {t.deletedNotice}
+          </p>
+        ) : null}
+        {deleteFailed ? (
+          <p className="feedback-box feedback-box--error" role="alert">
+            {t.deleteFailed}
+          </p>
+        ) : null}
         <noscript>
           <p className="feedback-box">
             <a href={`/${locale}/onboarding?view=all`}>{t.reviewAll}</a>
@@ -739,6 +806,7 @@ export function ProfileJourney({
             </div>
           </fieldset>
         </form>
+        {deleteControl()}
         <p className="journey-memory">{t.memory}</p>
       </div>
     </main>

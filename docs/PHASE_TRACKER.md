@@ -1,4 +1,4 @@
-# Phase tracker — updated 2026-11-18
+# Phase tracker — updated 2026-11-21
 
 **2026-11-04 student UX:** user-authorized account/profile/privacy redesign and
 original mascot implemented; see [STUDENT_EXPERIENCE.md](STUDENT_EXPERIENCE.md).
@@ -38,11 +38,20 @@ rescheduled) and **8/8 RLS/role checks** (cross-user profile read/write denied,
 self-granted editor role denied, non-member editorial API 403). Two defects found
 by this run (the deadlines origin check under a `0.0.0.0` bind address and a
 preferences upsert against column-only grants) are fixed with regression tests.
-`npm run check` passes 265 tests and `npm run test:e2e` passes 106/106. See
+`npm run check` passes 268 tests, `npm run test:e2e` passes 106/106 and journey
+UI passes 35/35. See
 [PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md](PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md).
 Phases 08, 09, 19 and 23 move to IMPLEMENTED_AND_TESTED; production scanner
 hosting, Vault backup/restore, official source-change hosted replay, email
 delivery and the reviewed corpus remain open, so none is labelled VERIFIED.
+
+**2026-11-21 profile deletion and scanner follow-up:** profile deletion now has a
+server action, a confirmation dialog in the three locales, unit coverage and a
+hosted **12/12** acceptance run (owner delete, cross-user denial, version-history
+cascade, account preserved). The local ClamAV worker released a clean file and
+rejected a controlled signature, with direct Storage isolation **5/5**. Full
+account deletion (all private objects plus the Auth user), eligibility-impact
+display, production scanner hosting and a Vault backup/restore drill remain open.
 
 Historical Phase 16 context: **PARTIAL**. The authenticated matching API, deterministic rule/ranking engine, private owner-RLS persistence, and localized workspace are implemented and cloud SQL-tested. The authorized development catalog has zero programs and scholarships; direct hosted Auth/REST is unavailable from this workspace. Live profile-to-recommendation behavior and deployment therefore remain unverified. Earlier partial/unverified phase labels are preserved. Phase 17 has not started.
 
@@ -56,7 +65,7 @@ Historical Phase 16 context: **PARTIAL**. The authenticated matching API, determ
 | 06    | High-converting landing, SEO и motion                            | PARTIAL                    | 39 localized pages, truthful demo, SEO, Chromium/axe and mobile Lighthouse lab evidence; onboarding/pricing/catalog gates open. See PHASE_06_REVIEW                                                                                                                                                                         |
 | 07    | IA, mobile UX, localization и accessibility                      | IMPLEMENTED (NOT VERIFIED) | `docs/IA_MOBILE_A11Y_AUDIT.md`: route/nav inventory, RU/KK/EN parity, axe/keyboard/reduced-motion evidence; physical-device and hosted-auth a11y passes open                                                                                                                                                                |
 | 08    | Supabase Auth, RLS, sessions, roles и onboarding                 | IMPLEMENTED_AND_TESTED     | Hosted two-account sign-in/out, session reload, anonymous redirect, wrong-password rejection, owner isolation and role-membership denial pass; email-confirmation signup and OAuth remain open. See PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md                                                                                  |
-| 09    | Полноценный Academic & Personal Profile Builder                  | IMPLEMENTED_AND_TESTED     | Hosted profile insert/update, contiguous immutable version history and saved-document rendering pass; profile delete and eligibility-impact display open. See PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md                                                                                                                        |
+| 09    | Полноценный Academic & Personal Profile Builder                  | IMPLEMENTED_AND_TESTED     | Hosted profile insert/update, contiguous immutable version history, saved-document rendering, owner delete/history cascade and cross-user delete denial pass; full account deletion and eligibility-impact display remain open. See PHASE_08_09_19_23_HOSTED_ACCEPTANCE.md                                                  |
 | 10    | Canonical PostgreSQL Global Admissions Database                  | UNVERIFIED                 | Cloud normalized schema exists; migration SQL recovered, phase acceptance not rechecked                                                                                                                                                                                                                                     |
 | 11    | Data ingestion, верификация, обновления и provenance             | PARTIAL                    | Policy-gated source boundary, change detection and editorial review/publish slice; no automated fetch/parser/scheduler or full queue. See DATA_INGESTION.md and CATALOG_EDITOR_QA.md                                                                                                                                        |
 | 12    | University & Program Explorer                                    | PARTIAL                    | Read-only cloud SQL search, pages, filter fixtures; hosted REST now works but no real reviewed program rows; see Phase 12 review                                                                                                                                                                                            |
