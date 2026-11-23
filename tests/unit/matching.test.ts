@@ -8,7 +8,9 @@ import {
   type Candidate,
   type MatchingProfile,
   type MatchingPreferences,
+  type RuleResult,
 } from '@/features/matching/engine';
+import { localizedReason, localizedRule } from '@/features/matching/localized';
 import { mergeProfileDocument } from '@/features/matching/profile';
 
 const now = '2026-10-25T10:00:00.000Z';
@@ -308,5 +310,70 @@ describe('matching eligibility', () => {
       { code: 'GRE', score: 320, verified: true },
       { code: 'IELTS', score: 7, verified: false },
     ]);
+  });
+});
+
+describe('matching explanations stay localized in ru and kk', () => {
+  const reasonRule: RuleResult = {
+    id: 'deadline',
+    status: 'UNKNOWN',
+    explanation: 'EN_SENTINEL',
+    requirement: 'Application deadline',
+    sourceUrl: null,
+    verification: 'unverified',
+    evaluatedAt: now,
+    mandatory: true,
+  };
+
+  it('localizes every preference reason the ranking engine can emit', () => {
+    const full: MatchingPreferences = {
+      countries: ['DE'],
+      majors: ['Computer Science'],
+      levels: ['bachelor'],
+      languages: ['en'],
+      fundingRequired: true,
+    };
+    const scholarship: Candidate = {
+      ...candidate,
+      entityType: 'scholarship',
+      coverage: ['tuition'],
+      costAmount: 9000,
+      costCurrency: 'USD',
+      costPeriod: 'academic_year',
+      costVerified: true,
+    };
+    const ranked = rank(scholarship, profile, full);
+    expect(ranked.preferenceReasons).toHaveLength(6);
+    expect(ranked.preferenceScore).toBe(100);
+    for (const reason of ranked.preferenceReasons) {
+      expect(localizedReason('ru', reason), reason).not.toBe(reason);
+      expect(localizedReason('kk', reason), reason).not.toBe(reason);
+    }
+  });
+
+  it('localizes rule explanations for every rule kind and status', () => {
+    const kinds = [
+      'deadline',
+      'requirements_coverage',
+      'scholarship_program_link',
+      'funding_coverage',
+      'catalog_source',
+      'requirement:1:test:IELTS',
+      'requirement:1:citizenship',
+      'requirement:1:residency',
+      'requirement:1:gpa',
+      'requirement:1:prior_degree',
+      'requirement:1:unstructured',
+    ];
+    for (const id of kinds)
+      for (const status of ['MET', 'NOT_MET', 'UNKNOWN'] as const) {
+        const rule = { ...reasonRule, id, status };
+        for (const locale of ['ru', 'kk'] as const) {
+          const text = localizedRule(locale, rule);
+          expect(text, `${locale}/${id}/${status}`).not.toBe('');
+          expect(text, `${locale}/${id}/${status}`).not.toBe('EN_SENTINEL');
+        }
+      }
+    expect(localizedRule('en', reasonRule)).toBe('EN_SENTINEL');
   });
 });

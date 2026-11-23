@@ -51,6 +51,7 @@ export const catalogCopy = {
     levels: {
       bachelor: 'Бакалавриат',
       master: 'Магистратура',
+      doctorate: 'Докторантура',
       associate: 'Колледж',
       foundation: 'Подготовка',
     },
@@ -111,6 +112,7 @@ export const catalogCopy = {
     levels: {
       bachelor: 'Бакалавриат',
       master: 'Магистратура',
+      doctorate: 'Докторантура',
       associate: 'Колледж',
       foundation: 'Дайындық',
     },
@@ -171,6 +173,7 @@ export const catalogCopy = {
     levels: {
       bachelor: 'Bachelor',
       master: 'Master',
+      doctorate: 'Doctorate',
       associate: 'College',
       foundation: 'Foundation',
     },

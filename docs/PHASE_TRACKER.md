@@ -204,3 +204,30 @@ Exact evidence and residual limits: `docs/PHASE_15_REVIEW.md`. Phase 15 is
 - [ ] Optional external AI provider: no configured credentials, deterministic explanations only.
 
 **Status: PARTIAL**. Keep this label until a small verified live corpus and reachable Auth/REST runtime prove login → profile → matching → details/save/compare → preference edit/recalculation and two-user isolation. Stop before Phase 17.
+
+## Addendum — 2026-11-23 full-repository audit
+
+A design/logic/architecture audit fixed six defect classes without any phase
+upgrade; exact findings and the full gap list are in
+[AUDIT_REPORT_2026-11-23.md](AUDIT_REPORT_2026-11-23.md):
+
+- Matching RU/KK explanations missed the budget-preference reason (English
+  leaked into localized results); every engine reason and rule kind is now
+  translation-tested.
+- Raw catalog enum codes (`award_type`, `opportunity_type`,
+  `participation_format`, `cost_state`, `cost_period`, `doctorate` level)
+  leaked into RU/KK/EN detail views; localized label maps plus a pure labels
+  module now cover every database enum value, unit-tested per locale.
+- Program detail rendered stray `· , ` punctuation and silent empty values
+  for missing campus/study-mode/teaching-language facts.
+- `robots.txt` kept private and account routes indexable when public
+  indexing was enabled; the full Disallow contract is now tested.
+
+Local gates at this state: `npm run check` PASS with 116 unit/integration
+tests (nine new), production Chromium E2E 80 passed with the four hosted-Auth
+skips unchanged, journey component suite 6/6, and the six design-system
+visual baselines matched with zero diff. Hosted Auth/REST remains CONNECT 403
+from this workspace; no phase label moved. Factual note only: schema
+migrations for phases 13–14 and 17–20 plus the catalog editorial console and
+`mirror_x` exist in `supabase/migrations` with no product UI built over them;
+this does not constitute phase authorization or completion.

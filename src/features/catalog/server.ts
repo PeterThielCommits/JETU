@@ -8,7 +8,7 @@ export const filtersSchema = z
     country: optionalText,
     city: optionalText,
     level: z
-      .enum(['', 'bachelor', 'master', 'associate', 'foundation'])
+      .enum(['', 'bachelor', 'master', 'doctorate', 'associate', 'foundation'])
       .optional()
       .default(''),
     major: optionalText,

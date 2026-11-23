@@ -228,7 +228,7 @@ export async function CatalogSearch({
                     <a href={`/${locale}/universities/${row.university_slug}`}>
                       {row.university_name}
                     </a>{' '}
-                    · {row.major} · {row.teaching_language}
+                    · {row.major} · {row.teaching_language ?? t.unknown}
                   </p>
                   <p>
                     {t.cost}:{' '}
@@ -345,7 +345,7 @@ export async function UniversityDetail({
                   <p>
                     {t.levels[program.level as keyof typeof t.levels] ??
                       program.level}{' '}
-                    · {program.major} · {program.teaching_language}
+                    · {program.major} · {program.teaching_language ?? t.unknown}
                   </p>
                   <p>
                     {t.cost}:{' '}
@@ -413,8 +413,13 @@ export async function ProgramDetail({
         <p>
           <a href={`/${locale}/universities/${university.slug}`}>
             {university.name}
-          </a>{' '}
-          · {campus?.city}, {campus?.country}
+          </a>
+          {campus && (
+            <>
+              {' · '}
+              {campus.city}, {campus.country}
+            </>
+          )}
         </p>
         <div className="catalog-detail-grid">
           <section className="catalog-card">
@@ -430,8 +435,10 @@ export async function ProgramDetail({
             </p>
             <p>
               {t.mode}:{' '}
-              {t.modes[program.study_mode as keyof typeof t.modes] ??
-                program.study_mode}
+              {program.study_mode
+                ? (t.modes[program.study_mode as keyof typeof t.modes] ??
+                  program.study_mode)
+                : t.unknown}
             </p>
           </section>
           <section className="catalog-card">

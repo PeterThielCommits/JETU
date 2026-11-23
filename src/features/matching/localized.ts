@@ -127,6 +127,8 @@ const reasons: Record<Locale, Record<string, string>> = {
       'Совпадает предпочтительный уровень обучения.',
     'Source-backed tuition funding is listed.':
       'Указана подтверждённая источником оплата обучения.',
+    'Listed annual tuition is within the stated budget; living costs are separate.':
+      'Указанная годовая стоимость обучения в пределах бюджета; проживание считается отдельно.',
   },
   kk: {
     'Preferred field matches.': 'Қалаулы оқу бағыты сәйкес.',
@@ -135,6 +137,8 @@ const reasons: Record<Locale, Record<string, string>> = {
     'Preferred degree level matches.': 'Қалаулы оқу деңгейі сәйкес.',
     'Source-backed tuition funding is listed.':
       'Дереккөзбен расталған оқу ақысы көрсетілген.',
+    'Listed annual tuition is within the stated budget; living costs are separate.':
+      'Көрсетілген жылдық оқу ақысы бюджет шегінде; тұру бөлек есептеледі.',
   },
 };
 export const localizedReason = (locale: Locale, reason: string) =>

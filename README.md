@@ -9,6 +9,8 @@ corpus, and the real hosted account → profile → matching journey remains unv
 The 2026-11-03 quality pass adds stale-save protection, resilient autocomplete,
 matching validation/retry/session feedback and reduced-motion-aware transitions.
 See [MVP_COMPLETION.md](docs/MVP_COMPLETION.md) for current scope and actual evidence.
+The 2026-11-23 [full audit and phase gap report](docs/AUDIT_REPORT_2026-11-23.md)
+lists fixed defects, unclosed phases and every feature still required.
 The 2026-11-04 [student experience](docs/STUDENT_EXPERIENCE.md) adds a JETU mascot,
 accessible account forms, a five-step private profile journey and a detailed
 localized privacy policy. Browser component checks: `npm run test:journey-ui`.

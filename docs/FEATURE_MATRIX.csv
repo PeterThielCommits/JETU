@@ -13,6 +13,8 @@ Catalog explorer (read-only),12,/{locale}/universities + /{locale}/programs/{id}
 Unified catalog search,15,/{locale}/search + /api/search/suggest,anon SECURITY INVOKER RPC,published catalog RLS,Vitest + cloud pgTAP/10k rollback + Playwright,IMPLEMENTED (PHASE PARTIAL; no real corpus/live REST)
 Private saves,15,/{locale}/saved,authenticated server actions,saved_catalog_items + saved_searches owner RLS,Vitest + two-user cloud pgTAP,IMPLEMENTED (PHASE PARTIAL; live Auth browser blocked)
 Program comparison,15,/{locale}/compare,batched anon reads through unified RPC,published catalog RLS,Vitest sparse comparison + Playwright responsive/invalid state,IMPLEMENTED (PHASE PARTIAL)
-Matching/AI/doc vault,16+,not exposed,not implemented,not implemented,not run,BACKLOG
+Explainable matching engine and workspace,16,/{locale}/match + /api/matching/run,server actions + authenticated JSON API + deterministic engine,matching_preferences + matching_runs + matching_results owner RLS,12 engine tests + API guard e2e + journey browser checks,IMPLEMENTED (PHASE PARTIAL; no live corpus/hosted Auth E2E)
+Roadmap/CRM/vault/coach schema,17-20,supabase/migrations only,PostgreSQL tables + guarded transitions + quotas,roadmaps/applications/vault/writing/coach tables with owner RLS,cloud migration replays and SQL assertions only,DB FOUNDATION ONLY (NO PRODUCT UI OR API)
+Catalog editorial console and mirror_x schema,28,supabase/migrations only,editor RPC + mirror_x schema,catalog_editor_memberships + mirror_x tables,cloud migration replays only,DB FOUNDATION ONLY (NO PRODUCT UI)
 Visual system and vector identity,05,src/styles/tokens.css + public/brand,shared semantic UI,none,contrast + axe + screenshots,IMPLEMENTED_AND_TESTED
 Localized component playground,05,/{locale}/design-system,local preview + actual section registry,none,Playwright UI/keyboard/no-JS/offline + visual diff,IMPLEMENTED_AND_TESTED

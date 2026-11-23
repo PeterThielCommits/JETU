@@ -5,6 +5,13 @@ import { saveCatalogItem, saveSearch } from './actions';
 import { SearchAutocomplete } from './autocomplete';
 import { searchCopy } from './copy';
 import {
+  awardTypeLabel,
+  costStateLabel,
+  formatValueLabel,
+  opportunityTypeLabel,
+  periodLabel,
+} from './labels';
+import {
   getOpportunityDetail,
   getProgramComparison,
   getScholarshipDetail,
@@ -42,7 +49,9 @@ function formatMoney(row: UnifiedSearchRow, locale: Locale) {
     row.cost_amount_max === null || row.cost_amount_max === row.cost_amount_min
       ? min
       : `${min}–${number.format(row.cost_amount_max)}`;
-  return row.cost_period ? `${range} / ${row.cost_period}` : range;
+  return row.cost_period
+    ? `${range} / ${periodLabel(locale, row.cost_period)}`
+    : range;
 }
 
 function queryHref(
@@ -707,7 +716,7 @@ export async function ScholarshipDetailPage({
         </div>
         <div>
           <dt>{t.awardType}</dt>
-          <dd>{item.award_type}</dd>
+          <dd>{awardTypeLabel(locale, item.award_type)}</dd>
         </div>
         <div>
           <dt>{t.deadline}</dt>
@@ -774,11 +783,11 @@ export async function OpportunityDetailPage({
         </div>
         <div>
           <dt>{t.category}</dt>
-          <dd>{item.opportunity_type}</dd>
+          <dd>{opportunityTypeLabel(locale, item.opportunity_type)}</dd>
         </div>
         <div>
           <dt>{t.format}</dt>
-          <dd>{item.participation_format}</dd>
+          <dd>{formatValueLabel(locale, item.participation_format)}</dd>
         </div>
         <div>
           <dt>{t.location}</dt>
@@ -787,7 +796,7 @@ export async function OpportunityDetailPage({
         <div>
           <dt>{t.costLabel}</dt>
           <dd>
-            {item.cost_state}
+            {costStateLabel(locale, item.cost_state)}
             {item.cost_amount_min !== null
               ? ` · ${item.cost_amount_min}${item.cost_currency_code ? ` ${item.cost_currency_code}` : ''}`
               : ''}
