@@ -58,6 +58,7 @@ const en = {
   saveSearch: 'Save this search',
   saveName: 'Saved search name',
   savedDestination: 'Saved items',
+  openCalendar: 'Open calendar',
   signInSave: 'Sign in to save',
   suggestions: 'Search suggestions',
   loadingSuggestions: 'Loading suggestions',
@@ -134,6 +135,13 @@ const en = {
   location: 'Location',
   tags: 'Tags',
   costLabel: 'Published cost',
+  period: {
+    academic_year: 'year',
+    semester: 'semester',
+    program: 'program',
+    term: 'term',
+    credit: 'credit',
+  },
 };
 
 export type SearchCopy = typeof en;
@@ -198,6 +206,7 @@ export const searchCopy: Record<Locale, SearchCopy> = {
     saveSearch: 'Сохранить поиск',
     saveName: 'Название поиска',
     savedDestination: 'Сохранённое',
+    openCalendar: 'Открыть календарь',
     signInSave: 'Войти, чтобы сохранить',
     suggestions: 'Подсказки поиска',
     loadingSuggestions: 'Загрузка подсказок',
@@ -275,6 +284,13 @@ export const searchCopy: Record<Locale, SearchCopy> = {
     location: 'Место',
     tags: 'Теги',
     costLabel: 'Опубликованная стоимость',
+    period: {
+      academic_year: 'год',
+      semester: 'семестр',
+      program: 'программа',
+      term: 'срок',
+      credit: 'кредит',
+    },
   },
   kk: {
     ...en,
@@ -335,6 +351,7 @@ export const searchCopy: Record<Locale, SearchCopy> = {
     saveSearch: 'Іздеуді сақтау',
     saveName: 'Сақталған іздеу атауы',
     savedDestination: 'Сақталғандар',
+    openCalendar: 'Күнтізбені ашу',
     signInSave: 'Сақтау үшін кіріңіз',
     suggestions: 'Іздеу ұсыныстары',
     loadingSuggestions: 'Ұсыныстар жүктелуде',
@@ -411,5 +428,12 @@ export const searchCopy: Record<Locale, SearchCopy> = {
     location: 'Орналасуы',
     tags: 'Тегтер',
     costLabel: 'Жарияланған құны',
+    period: {
+      academic_year: 'жыл',
+      semester: 'семестр',
+      program: 'бағдарлама',
+      term: 'мерзім',
+      credit: 'кредит',
+    },
   },
 };

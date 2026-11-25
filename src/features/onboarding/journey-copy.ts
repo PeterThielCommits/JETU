@@ -41,6 +41,7 @@ const ru = {
     unavailable:
       'Сервис сейчас недоступен. Введённые данные остались на экране — попробуй ещё раз.',
     rate: 'Слишком много попыток. Немного подожди и повтори.',
+    link: 'Ссылка недействительна или истекла. Запроси новую и попробуй снова.',
   },
   steps: ['О тебе', 'Твоя цель', 'Подготовка', 'Бюджет', 'Всё готово'],
   navSteps: ['Ты', 'Цель', 'Учёба', 'Бюджет', 'Итог'],
@@ -200,6 +201,7 @@ const en: typeof ru = {
     unavailable:
       'The service is unavailable. Your input is still here; please try again.',
     rate: 'Too many attempts. Please wait a little and try again.',
+    link: 'This link is invalid or has expired. Request a new one and try again.',
   },
   steps: ['About you', 'Your goal', 'Preparation', 'Budget', 'Ready to go'],
   navSteps: ['You', 'Goal', 'Study', 'Budget', 'Ready'],
@@ -357,6 +359,7 @@ const kk: typeof ru = {
     unavailable:
       'Қызмет қазір қолжетімсіз. Енгізген деректерің осында қалды — қайталап көр.',
     rate: 'Әрекет саны тым көп. Сәл күтіп, қайталап көр.',
+    link: 'Сілтеме жарамсыз немесе мерзімі өткен. Жаңасын сұрап, қайталап көр.',
   },
   steps: ['Сен туралы', 'Мақсатың', 'Дайындық', 'Бюджет', 'Бәрі дайын'],
   navSteps: ['Сен', 'Мақсат', 'Оқу', 'Бюджет', 'Дайын'],

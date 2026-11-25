@@ -22,11 +22,12 @@ const localeTag = (locale: Locale) =>
   locale === 'kk' ? 'kk-KZ' : locale === 'ru' ? 'ru-RU' : 'en-US';
 
 function formatDate(value: string | null, locale: Locale) {
-  return value
-    ? new Intl.DateTimeFormat(localeTag(locale), {
-        dateStyle: 'medium',
-      }).format(new Date(value))
-    : null;
+  if (!value) return null;
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  return new Intl.DateTimeFormat(localeTag(locale), {
+    dateStyle: 'medium',
+    ...(dateOnly ? { timeZone: 'UTC' } : {}),
+  }).format(new Date(dateOnly ? `${value}T00:00:00Z` : value));
 }
 
 function formatMoney(row: UnifiedSearchRow, locale: Locale) {
@@ -42,7 +43,9 @@ function formatMoney(row: UnifiedSearchRow, locale: Locale) {
     row.cost_amount_max === null || row.cost_amount_max === row.cost_amount_min
       ? min
       : `${min}–${number.format(row.cost_amount_max)}`;
-  return row.cost_period ? `${range} / ${row.cost_period}` : range;
+  return row.cost_period
+    ? `${range} / ${t.period[row.cost_period as keyof typeof t.period] ?? row.cost_period}`
+    : range;
 }
 
 function queryHref(
@@ -264,6 +267,44 @@ export async function UnifiedSearchPage({
           <h1>{t.title}</h1>
           <p>{t.intro}</p>
         </header>
+        {filters && (
+          <nav
+            className="search-type-presets search-sort-presets"
+            aria-label={t.type}
+          >
+            {(['', 'program', 'scholarship', 'opportunity'] as const).map(
+              (type) => (
+                <a
+                  key={type}
+                  href={queryHref(locale, filters, { type, page: 1 })}
+                  aria-current={filters.type === type ? 'true' : undefined}
+                >
+                  {type ? t[type] : t.all}
+                </a>
+              ),
+            )}
+          </nav>
+        )}
+        {filters && (
+          <nav className="search-sort-presets" aria-label={t.sort}>
+            {(
+              [
+                ['relevance', t.relevance],
+                ['deadline', t.deadlineSort],
+                ['recent', t.recent],
+                ['title', t.titleSort],
+              ] as const
+            ).map(([sort, label]) => (
+              <a
+                key={sort}
+                href={queryHref(locale, filters, { sort, page: 1 })}
+                aria-current={filters.sort === sort ? 'true' : undefined}
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+        )}
         <form
           action={`/${locale}/search`}
           method="get"
@@ -298,74 +339,113 @@ export async function UnifiedSearchPage({
               defaultValue={filters?.country ?? ''}
             />
           </label>
-          <label>
-            {t.level}
-            <select name="level" defaultValue={filters?.level ?? ''}>
-              <option value="">—</option>
-              <option value="bachelor">{t.option.bachelor}</option>
-              <option value="master">{t.option.master}</option>
-              <option value="doctorate">{t.option.doctorate}</option>
-              <option value="associate">{t.option.associate}</option>
-              <option value="foundation">{t.option.foundation}</option>
-            </select>
-          </label>
-          <label>
-            {t.category}
-            <input
-              name="category"
-              maxLength={80}
-              defaultValue={filters?.category ?? ''}
-            />
-          </label>
-          <label>
-            {t.format}
-            <select name="format" defaultValue={filters?.format ?? ''}>
-              <option value="">—</option>
-              <option value="on_campus">{t.option.onCampus}</option>
-              <option value="in_person">{t.option.inPerson}</option>
-              <option value="online">{t.option.online}</option>
-              <option value="hybrid">{t.option.hybrid}</option>
-              <option value="unknown">{t.unknown}</option>
-            </select>
-          </label>
-          <label>
-            {t.funding}
-            <select name="funding" defaultValue={filters?.funding ?? ''}>
-              <option value="">—</option>
-              <option value="partial">{t.option.partial}</option>
-              <option value="full_tuition">{t.option.fullTuition}</option>
-              <option value="tuition_stipend">{t.option.tuitionStipend}</option>
-              <option value="comprehensive">{t.option.comprehensive}</option>
-              <option value="unknown">{t.unknown}</option>
-            </select>
-          </label>
-          <label>
-            {t.cost}
-            <select name="cost" defaultValue={filters?.cost ?? ''}>
-              <option value="">—</option>
-              <option value="free">{t.option.free}</option>
-              <option value="paid">{t.option.paid}</option>
-              <option value="fee_waiver_available">{t.option.feeWaiver}</option>
-              <option value="unknown">{t.unknown}</option>
-            </select>
-          </label>
-          <label>
-            {t.deadline}
-            <input
-              type="date"
-              name="deadline"
-              defaultValue={filters?.deadline ?? ''}
-            />
-          </label>
-          <label>
-            {t.sort}
-            <select name="sort" defaultValue={filters?.sort ?? 'relevance'}>
-              <option value="relevance">{t.relevance}</option>
-              <option value="recent">{t.recent}</option>
-              <option value="deadline">{t.deadlineSort}</option>
-              <option value="title">{t.titleSort}</option>
-            </select>
-          </label>
+          <details
+            className="search-advanced"
+            open={Boolean(
+              filters &&
+              [
+                'level',
+                'category',
+                'format',
+                'funding',
+                'cost',
+                'deadline',
+              ].some((key) => filters[key as keyof SearchFilters]),
+            )}
+          >
+            <summary>
+              {t.filters}{' '}
+              <span className="ui-badge">
+                {filters
+                  ? [
+                      'level',
+                      'category',
+                      'format',
+                      'funding',
+                      'cost',
+                      'deadline',
+                    ].filter((key) => filters[key as keyof SearchFilters])
+                      .length
+                  : 0}
+              </span>
+            </summary>
+            <div className="search-advanced-grid">
+              <label>
+                {t.level}
+                <select name="level" defaultValue={filters?.level ?? ''}>
+                  <option value="">—</option>
+                  <option value="bachelor">{t.option.bachelor}</option>
+                  <option value="master">{t.option.master}</option>
+                  <option value="doctorate">{t.option.doctorate}</option>
+                  <option value="associate">{t.option.associate}</option>
+                  <option value="foundation">{t.option.foundation}</option>
+                </select>
+              </label>
+              <label>
+                {t.category}
+                <input
+                  name="category"
+                  maxLength={80}
+                  defaultValue={filters?.category ?? ''}
+                />
+              </label>
+              <label>
+                {t.format}
+                <select name="format" defaultValue={filters?.format ?? ''}>
+                  <option value="">—</option>
+                  <option value="on_campus">{t.option.onCampus}</option>
+                  <option value="in_person">{t.option.inPerson}</option>
+                  <option value="online">{t.option.online}</option>
+                  <option value="hybrid">{t.option.hybrid}</option>
+                  <option value="unknown">{t.unknown}</option>
+                </select>
+              </label>
+              <label>
+                {t.funding}
+                <select name="funding" defaultValue={filters?.funding ?? ''}>
+                  <option value="">—</option>
+                  <option value="partial">{t.option.partial}</option>
+                  <option value="full_tuition">{t.option.fullTuition}</option>
+                  <option value="tuition_stipend">
+                    {t.option.tuitionStipend}
+                  </option>
+                  <option value="comprehensive">
+                    {t.option.comprehensive}
+                  </option>
+                  <option value="unknown">{t.unknown}</option>
+                </select>
+              </label>
+              <label>
+                {t.cost}
+                <select name="cost" defaultValue={filters?.cost ?? ''}>
+                  <option value="">—</option>
+                  <option value="free">{t.option.free}</option>
+                  <option value="paid">{t.option.paid}</option>
+                  <option value="fee_waiver_available">
+                    {t.option.feeWaiver}
+                  </option>
+                  <option value="unknown">{t.unknown}</option>
+                </select>
+              </label>
+              <label>
+                {t.deadline}
+                <input
+                  type="date"
+                  name="deadline"
+                  defaultValue={filters?.deadline ?? ''}
+                />
+              </label>
+              <label>
+                {t.sort}
+                <select name="sort" defaultValue={filters?.sort ?? 'relevance'}>
+                  <option value="relevance">{t.relevance}</option>
+                  <option value="recent">{t.recent}</option>
+                  <option value="deadline">{t.deadlineSort}</option>
+                  <option value="title">{t.titleSort}</option>
+                </select>
+              </label>
+            </div>
+          </details>
           {filters?.compare && (
             <input type="hidden" name="compare" value={filters.compare} />
           )}
@@ -721,14 +801,21 @@ export async function ScholarshipDetailPage({
           <dd>{item.benefit_summary ?? t.unknown}</dd>
         </div>
       </dl>
-      <a
-        className="ui-button ui-button--primary"
-        href={item.official_url}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {t.officialApply}
-      </a>
+      <div className="detail-actions">
+        <a
+          className="ui-button ui-button--primary"
+          href={item.official_url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t.officialApply}
+        </a>
+        <form action={saveCatalogItem.bind(null, locale, item.id)}>
+          <button className="ui-button ui-button--secondary" type="submit">
+            {t.saveItem}
+          </button>
+        </form>
+      </div>
     </DetailShell>
   );
 }
@@ -797,6 +884,15 @@ export async function OpportunityDetailPage({
           <dt>{t.deadline}</dt>
           <dd>{formatDate(item.deadline_at, locale) ?? t.unknown}</dd>
         </div>
+        {item.starts_on || item.ends_on ? (
+          <div>
+            <dt>{t.dates}</dt>
+            <dd>
+              {formatDate(item.starts_on, locale) ?? t.unknown} –{' '}
+              {formatDate(item.ends_on, locale) ?? t.unknown}
+            </dd>
+          </div>
+        ) : null}
         <div>
           <dt>{t.ageRange}</dt>
           <dd>
@@ -825,17 +921,30 @@ export async function OpportunityDetailPage({
           <dt>{t.risk}</dt>
           <dd>{item.risk_summary ?? t.unknown}</dd>
         </div>
+        {item.tags.length ? (
+          <div>
+            <dt>{t.tags}</dt>
+            <dd>{item.tags.join(', ')}</dd>
+          </div>
+        ) : null}
       </dl>
-      {item.official_application_url && (
-        <a
-          className="ui-button ui-button--primary"
-          href={item.official_application_url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {t.officialApply}
-        </a>
-      )}
+      <div className="detail-actions">
+        {item.official_application_url && (
+          <a
+            className="ui-button ui-button--primary"
+            href={item.official_application_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.officialApply}
+          </a>
+        )}
+        <form action={saveCatalogItem.bind(null, locale, item.id)}>
+          <button className="ui-button ui-button--secondary" type="submit">
+            {t.saveItem}
+          </button>
+        </form>
+      </div>
     </DetailShell>
   );
 }

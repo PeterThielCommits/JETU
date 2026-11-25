@@ -22,6 +22,9 @@ import {
 } from './server';
 import { MarketingFooter } from '@/components/marketing/footer';
 import { notFound } from 'next/navigation';
+import { saveCatalogItem } from '@/features/search/actions';
+import { trackDeadline } from '@/features/deadlines/actions';
+import { createRequestSupabaseClient } from '@/lib/supabase/request';
 
 function date(value: string | null, locale: Locale) {
   return value
@@ -30,6 +33,26 @@ function date(value: string | null, locale: Locale) {
         { dateStyle: 'medium' },
       ).format(new Date(value))
     : null;
+}
+function dateOnly(value: string | null, locale: Locale) {
+  return value
+    ? new Intl.DateTimeFormat(
+        locale === 'kk' ? 'kk-KZ' : locale === 'ru' ? 'ru-RU' : 'en-US',
+        { dateStyle: 'medium', timeZone: 'UTC' },
+      ).format(new Date(`${value}T00:00:00Z`))
+    : null;
+}
+function languageName(value: string, locale: Locale) {
+  try {
+    return (
+      new Intl.DisplayNames(
+        [locale === 'kk' ? 'kk-KZ' : locale === 'ru' ? 'ru-RU' : 'en-US'],
+        { type: 'language', fallback: 'code' },
+      ).of(value) ?? value
+    );
+  } catch {
+    return value;
+  }
 }
 function price(
   amount: number | null,
@@ -372,9 +395,11 @@ export async function UniversityDetail({
 export async function ProgramDetail({
   locale,
   id,
+  status,
 }: {
   locale: Locale;
   id: string;
+  status?: string;
 }) {
   let program: CatalogProgram | null;
   let university: Awaited<ReturnType<typeof getUniversity>>;
@@ -402,6 +427,37 @@ export async function ProgramDetail({
     throw error;
   }
   const t = catalogCopy[locale];
+  const deadlineIds = intakes.flatMap((intake) =>
+    intake.deadline_id ? [intake.deadline_id] : [],
+  );
+  const tracked = new Set<number>();
+  if (deadlineIds.length) {
+    try {
+      const supabase = await createRequestSupabaseClient();
+      // Read the local session only to pre-select the button label; the
+      // database query below is still owner-scoped by RLS.
+      const { data: session } = await supabase.auth.getSession();
+      const userId = session.session?.user.id;
+      if (userId) {
+        const { data: rows } = await supabase
+          .from('deadline_watches')
+          .select('deadline_id')
+          .eq('user_id', userId)
+          .in('deadline_id', deadlineIds);
+        for (const row of rows ?? []) tracked.add(row.deadline_id);
+      }
+    } catch {
+      // Anonymous or provider failure: tracking stays available as an action.
+    }
+  }
+  const statusText =
+    status === 'tracked'
+      ? t.tracked
+      : status === 'untracked'
+        ? t.untracked
+        : status === 'error'
+          ? t.actionError
+          : '';
   return (
     <>
       <main id="main" className="page-shell catalog-main">
@@ -413,10 +469,69 @@ export async function ProgramDetail({
         <p>
           <a href={`/${locale}/universities/${university.slug}`}>
             {university.name}
-          </a>{' '}
-          · {campus?.city}, {campus?.country}
+          </a>
+          {campus ? ` · ${campus.city}, ${campus.country}` : ''}
         </p>
+        {statusText ? (
+          <p
+            className={`feedback-box ${status === 'error' ? 'feedback-box--error' : 'feedback-box--success'}`}
+            role={status === 'error' ? 'alert' : 'status'}
+          >
+            {statusText}
+          </p>
+        ) : null}
+        <div className="catalog-actions">
+          <form action={saveCatalogItem.bind(null, locale, Number(program.id))}>
+            <button className="ui-button ui-button--primary" type="submit">
+              {t.saveProgram}
+            </button>
+          </form>
+        </div>
         <div className="catalog-detail-grid">
+          <section className="catalog-card">
+            <h2>{t.programFacts}</h2>
+            <dl className="detail-facts">
+              <div>
+                <dt>{t.duration}</dt>
+                <dd>
+                  {program.duration_months
+                    ? `${program.duration_months} ${t.months}`
+                    : t.unknown}
+                </dd>
+              </div>
+              <div>
+                <dt>{t.credits}</dt>
+                <dd>
+                  {program.credit_value !== null
+                    ? `${program.credit_value}${program.credit_system ? ` · ${program.credit_system}` : ''}`
+                    : t.unknown}
+                </dd>
+              </div>
+              <div>
+                <dt>{t.languages}</dt>
+                <dd>
+                  {program.languages.length
+                    ? program.languages
+                        .map((value) => languageName(value, locale))
+                        .join(', ')
+                    : t.unknown}
+                </dd>
+              </div>
+              <div>
+                <dt>{t.formats}</dt>
+                <dd>
+                  {program.formats.length
+                    ? program.formats
+                        .map(
+                          (value) =>
+                            t.modes[value as keyof typeof t.modes] ?? value,
+                        )
+                        .join(', ')
+                    : t.unknown}
+                </dd>
+              </div>
+            </dl>
+          </section>
           <section className="catalog-card">
             <h2>{t.cost}</h2>
             <p>
@@ -451,11 +566,40 @@ export async function ProgramDetail({
           <section className="catalog-card">
             <h2>{t.intakes}</h2>
             {intakes.length ? (
-              <ul>
+              <ul className="catalog-intakes">
                 {intakes.map((intake, index) => (
-                  <li key={index}>
-                    {intake.label} · {t.deadlineLabel}:{' '}
-                    {date(intake.deadline_at, locale) ?? t.unknown}
+                  <li key={`${intake.label}-${index}`}>
+                    <span>
+                      {intake.label} · {t.deadlineLabel}:{' '}
+                      {dateOnly(intake.deadline_date, locale) ??
+                        date(intake.deadline_at, locale) ??
+                        t.unknown}
+                    </span>
+                    {intake.deadline_id ? (
+                      <form action={trackDeadline}>
+                        <input type="hidden" name="locale" value={locale} />
+                        <input
+                          type="hidden"
+                          name="deadlineId"
+                          value={intake.deadline_id}
+                        />
+                        <input
+                          type="hidden"
+                          name="returnTo"
+                          value={`/${locale}/programs/${program.id}`}
+                        />
+                        <input
+                          type="hidden"
+                          name="watch"
+                          value={tracked.has(intake.deadline_id) ? '0' : '1'}
+                        />
+                        <button className="ui-button" type="submit">
+                          {tracked.has(intake.deadline_id)
+                            ? t.untrack
+                            : t.track}
+                        </button>
+                      </form>
+                    ) : null}
                   </li>
                 ))}
               </ul>

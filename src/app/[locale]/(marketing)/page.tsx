@@ -8,6 +8,8 @@ import { Icon } from '@/components/ui/icon';
 import { MarketingFooter } from '@/components/marketing/footer';
 import { StudentWelcome } from '@/features/onboarding/welcome';
 import { authCopy } from '@/lib/i18n/auth';
+import { getPublicEnv } from '@/lib/env/public';
+import { createRequestSupabaseClient } from '@/lib/supabase/request';
 
 type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -21,6 +23,22 @@ export default async function LandingPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = marketing[locale];
+  let signedIn = false;
+  try {
+    const env = getPublicEnv();
+    if (
+      env.NEXT_PUBLIC_SUPABASE_URL &&
+      env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    ) {
+      const supabase = await createRequestSupabaseClient();
+      // The landing CTA only needs the local cookie session; it is a hint,
+      // never an authorization decision.
+      const { data } = await supabase.auth.getSession();
+      signedIn = Boolean(data.session?.user);
+    }
+  } catch {
+    // Public landing pages stay usable when auth is unavailable.
+  }
   return (
     <>
       <main id="main" tabIndex={-1}>
@@ -54,7 +72,7 @@ export default async function LandingPage({ params }: Props) {
         </section>
 
         <div className="landing-section page-shell">
-          <StudentWelcome locale={locale} />
+          <StudentWelcome locale={locale} signedIn={signedIn} />
         </div>
         <section
           className="landing-section page-shell"

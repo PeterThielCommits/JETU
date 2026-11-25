@@ -1,3 +1,4 @@
+@import '../styles/deadlines.css';
 @import 'tailwindcss';
 @import '../styles/tokens.css';
 @import '../styles/student-journey.css';
@@ -2773,4 +2774,51 @@ fieldset.showcase-layout {
   50% {
     opacity: 0.45;
   }
+}
+.detail-actions,
+.catalog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-block: var(--space-4);
+}
+.catalog-actions form,
+.detail-actions form {
+  margin: 0;
+}
+.catalog-intakes {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+.catalog-intakes li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--canvas);
+}
+.catalog-intakes li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.saved-heading-actions,
+.saved-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.saved-heading-actions {
+  justify-content: flex-end;
+}
+.saved-section-head h2 {
+  margin: 0;
 }

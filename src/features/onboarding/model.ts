@@ -154,7 +154,7 @@ export const registrationSchema = accountSchema.extend({
 });
 export type AccountState = {
   status: 'idle' | 'error' | 'check-email';
-  error?: 'invalid' | 'credentials' | 'unavailable' | 'rate';
+  error?: 'invalid' | 'credentials' | 'unavailable' | 'rate' | 'link';
   fields?: string[];
 };
 export const initialAccountState: AccountState = { status: 'idle' };
