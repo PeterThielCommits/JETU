@@ -15,6 +15,9 @@ export async function GET(request: Request) {
     const params = new URL(request.url).searchParams;
     const zone = zoneSchema.safeParse(params.get('timezone') ?? 'UTC');
     if (!zone.success) return errorResponse('VALIDATION_FAILED');
+    const eventKey = params.get('event_key');
+    if (eventKey !== null && (eventKey.length < 1 || eventKey.length > 120))
+      return errorResponse('VALIDATION_FAILED');
     const { data: events, error } = await client
       .from('calendar_events')
       .select('*')
@@ -34,7 +37,11 @@ export async function GET(request: Request) {
       },
       zone.data,
     );
-    return new Response(exportIcs(filtered, new Date().toISOString()), {
+    const selected = eventKey
+      ? filtered.filter((event) => event.event_key === eventKey)
+      : filtered;
+    if (eventKey && !selected.length) return errorResponse('NOT_FOUND');
+    return new Response(exportIcs(selected, new Date().toISOString()), {
       headers: {
         'Content-Type': 'text/calendar; charset=utf-8',
         'Content-Disposition': 'attachment; filename="jetu-calendar.ics"',

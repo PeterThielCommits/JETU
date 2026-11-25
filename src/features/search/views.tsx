@@ -22,11 +22,12 @@ const localeTag = (locale: Locale) =>
   locale === 'kk' ? 'kk-KZ' : locale === 'ru' ? 'ru-RU' : 'en-US';
 
 function formatDate(value: string | null, locale: Locale) {
-  return value
-    ? new Intl.DateTimeFormat(localeTag(locale), {
-        dateStyle: 'medium',
-      }).format(new Date(value))
-    : null;
+  if (!value) return null;
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  return new Intl.DateTimeFormat(localeTag(locale), {
+    dateStyle: 'medium',
+    ...(dateOnly ? { timeZone: 'UTC' } : {}),
+  }).format(new Date(dateOnly ? `${value}T00:00:00Z` : value));
 }
 
 function formatMoney(row: UnifiedSearchRow, locale: Locale) {
@@ -42,7 +43,9 @@ function formatMoney(row: UnifiedSearchRow, locale: Locale) {
     row.cost_amount_max === null || row.cost_amount_max === row.cost_amount_min
       ? min
       : `${min}–${number.format(row.cost_amount_max)}`;
-  return row.cost_period ? `${range} / ${row.cost_period}` : range;
+  return row.cost_period
+    ? `${range} / ${t.period[row.cost_period as keyof typeof t.period] ?? row.cost_period}`
+    : range;
 }
 
 function queryHref(
@@ -798,14 +801,21 @@ export async function ScholarshipDetailPage({
           <dd>{item.benefit_summary ?? t.unknown}</dd>
         </div>
       </dl>
-      <a
-        className="ui-button ui-button--primary"
-        href={item.official_url}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {t.officialApply}
-      </a>
+      <div className="detail-actions">
+        <a
+          className="ui-button ui-button--primary"
+          href={item.official_url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t.officialApply}
+        </a>
+        <form action={saveCatalogItem.bind(null, locale, item.id)}>
+          <button className="ui-button ui-button--secondary" type="submit">
+            {t.saveItem}
+          </button>
+        </form>
+      </div>
     </DetailShell>
   );
 }
@@ -874,6 +884,15 @@ export async function OpportunityDetailPage({
           <dt>{t.deadline}</dt>
           <dd>{formatDate(item.deadline_at, locale) ?? t.unknown}</dd>
         </div>
+        {item.starts_on || item.ends_on ? (
+          <div>
+            <dt>{t.dates}</dt>
+            <dd>
+              {formatDate(item.starts_on, locale) ?? t.unknown} –{' '}
+              {formatDate(item.ends_on, locale) ?? t.unknown}
+            </dd>
+          </div>
+        ) : null}
         <div>
           <dt>{t.ageRange}</dt>
           <dd>
@@ -902,17 +921,30 @@ export async function OpportunityDetailPage({
           <dt>{t.risk}</dt>
           <dd>{item.risk_summary ?? t.unknown}</dd>
         </div>
+        {item.tags.length ? (
+          <div>
+            <dt>{t.tags}</dt>
+            <dd>{item.tags.join(', ')}</dd>
+          </div>
+        ) : null}
       </dl>
-      {item.official_application_url && (
-        <a
-          className="ui-button ui-button--primary"
-          href={item.official_application_url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {t.officialApply}
-        </a>
-      )}
+      <div className="detail-actions">
+        {item.official_application_url && (
+          <a
+            className="ui-button ui-button--primary"
+            href={item.official_application_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t.officialApply}
+          </a>
+        )}
+        <form action={saveCatalogItem.bind(null, locale, item.id)}>
+          <button className="ui-button ui-button--secondary" type="submit">
+            {t.saveItem}
+          </button>
+        </form>
+      </div>
     </DetailShell>
   );
 }

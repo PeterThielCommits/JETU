@@ -119,6 +119,24 @@ export function ProfileWizard({
     });
   };
 
+  /** Focus the first usable control once the target step has rendered. */
+  const focusField = (field: string) => {
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const owner = document.getElementById(field);
+        if (!owner) return;
+        const control =
+          owner.matches('input, select, textarea, button, a[href]') ||
+          owner.tabIndex >= 0
+            ? owner
+            : owner.querySelector<HTMLElement>(
+                'input:not([type="hidden"]), select, textarea, button, a[href]',
+              );
+        (control ?? owner).focus({ preventScroll: false });
+      }),
+    );
+  };
+
   const advance = () => {
     const blockers = validateStep(step, values);
     if (blockers.length) {
@@ -151,9 +169,7 @@ export function ProfileWizard({
           : 'scores';
     goTo(ownerStep, 1);
     setAttempted(true);
-    requestAnimationFrame(() => {
-      document.getElementById(firstBroken)?.focus();
-    });
+    focusField(firstBroken);
   };
 
   const stepAlert = shownIssues.length > 0 && (
@@ -165,7 +181,22 @@ export function ProfileWizard({
     >
       <strong id="wiz-error-title">{w.errorTitle}</strong>
       {shownIssues.map((issue) => (
-        <a key={`${issue.field}:${issue.key}`} href={`#${issue.field}`}>
+        <a
+          key={`${issue.field}:${issue.key}`}
+          href={`#${issue.field}`}
+          onClick={(event) => {
+            event.preventDefault();
+            const owner = STEP_FIELDS.about.includes(issue.field)
+              ? 'about'
+              : STEP_FIELDS.background.includes(issue.field)
+                ? 'background'
+                : STEP_FIELDS.academics.includes(issue.field)
+                  ? 'academics'
+                  : 'scores';
+            goTo(owner, 1);
+            focusField(issue.field);
+          }}
+        >
           {w.errorKeys[issue.key]} — {fieldTitle(locale, issue.field)}
         </a>
       ))}
@@ -274,6 +305,7 @@ export function ProfileWizard({
                   error={fieldErrorText(locale, 'country', values)}
                 />
                 <TileGroup
+                  id="studyLevel"
                   name="studyLevel"
                   legend={`${t.studyLevel}`}
                   requiredMark
@@ -284,6 +316,7 @@ export function ProfileWizard({
                   value={values.studyLevel}
                   onChange={update('studyLevel')}
                   tone="tile"
+                  error={fieldErrorText(locale, 'studyLevel', values)}
                 />
                 <TextField
                   id="field"
@@ -333,6 +366,7 @@ export function ProfileWizard({
                   error={fieldErrorText(locale, 'residency', values)}
                 />
                 <TileGroup
+                  id="educationLevel"
                   name="educationLevel"
                   legend={m.educationLevel}
                   entries={[
@@ -350,6 +384,7 @@ export function ProfileWizard({
                   value={values.educationLevel}
                   onChange={update('educationLevel')}
                   tone="chip"
+                  error={fieldErrorText(locale, 'educationLevel', values)}
                 />
                 <TextField
                   id="graduationYear"
@@ -609,6 +644,7 @@ function TextField({
 }
 
 function TileGroup({
+  id,
   name,
   legend,
   requiredMark,
@@ -616,7 +652,9 @@ function TileGroup({
   value,
   onChange,
   tone,
+  error,
 }: {
+  id: string;
   name: string;
   legend: string;
   requiredMark?: boolean;
@@ -624,9 +662,15 @@ function TileGroup({
   value: string;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
   tone: 'tile' | 'chip';
+  error?: string;
 }) {
   return (
-    <fieldset className={`ui-field wiz-group wiz-group--${tone}`}>
+    <fieldset
+      id={id}
+      className={`ui-field wiz-group wiz-group--${tone}`}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={error ? `${id}-error` : undefined}
+    >
       <legend>
         {legend}
         {requiredMark && (
@@ -661,6 +705,11 @@ function TileGroup({
           </label>
         ))}
       </div>
+      {error && (
+        <p className="field-error" id={`${id}-error`}>
+          {error}
+        </p>
+      )}
     </fieldset>
   );
 }

@@ -2,13 +2,17 @@
 import { useRef, useState } from 'react';
 import { Temporal } from '@js-temporal/polyfill';
 import type { Locale } from '@/lib/i18n/messages';
+import { authCopy } from '@/lib/i18n/auth';
 import { Icon } from '@/components/ui/icon';
 import { JetuMascot } from '@/components/ui/mascot';
 import { deadlineCopy } from './copy';
+import { eventExportHref, googleCalendarUrl } from './links';
 import {
   categories,
+  daysUntil,
   eventDate,
   filterEvents,
+  localDate,
   preferencesSchema,
   type CalendarEvent,
   type Preferences,
@@ -27,7 +31,7 @@ export function DeadlineWorkspace({
   section,
   initial,
   initialError = false,
-  today,
+  today: initialToday,
   query = '',
 }: {
   locale: Locale;
@@ -41,8 +45,18 @@ export function DeadlineWorkspace({
   const [data, setData] = useState(initial);
   const [loadError, setLoadError] = useState(initialError);
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState('');
+  const [today, setToday] = useState(initialToday);
+  const [notice, setNotice] = useState(() => {
+    const params = new URLSearchParams(query);
+    const status = params.get('status');
+    if (status === 'tracked') return t.tracked;
+    if (status === 'untracked') return t.untracked;
+    if (params.get('success') === 'password-updated')
+      return authCopy[locale].passwordUpdated;
+    return '';
+  });
   const [error, setError] = useState('');
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [filters, setFilters] = useState(() => {
     const p = new URLSearchParams(query);
     return {
@@ -103,6 +117,12 @@ export function DeadlineWorkspace({
     setBusy(true);
     try {
       const r = await fetch('/api/deadlines', { cache: 'no-store' });
+      if (r.status === 401) {
+        setSessionExpired(true);
+        setError(t.sessionExpired);
+        setLoadError(false);
+        return false;
+      }
       const json = await r.json();
       if (!r.ok || !json.data) throw new Error();
       setData((previous) => ({
@@ -121,6 +141,10 @@ export function DeadlineWorkspace({
         new CustomEvent('jetu:unread', { detail: json.data.unread }),
       );
       setDraft(json.data.preferences);
+      setToday(
+        localDate(new Date().toISOString(), json.data.preferences.timezone),
+      );
+      setSessionExpired(false);
       setLoadError(false);
       return true;
     } catch {
@@ -142,6 +166,11 @@ export function DeadlineWorkspace({
       });
       const r = await fetch(`/api/deadlines?${p}`, { cache: 'no-store' });
       const result = await r.json();
+      if (r.status === 401) {
+        setSessionExpired(true);
+        setError(t.sessionExpired);
+        return;
+      }
       if (!r.ok || !result.data) throw new Error();
       setData((previous) =>
         previous
@@ -169,7 +198,12 @@ export function DeadlineWorkspace({
         body: JSON.stringify(payload),
       });
       if (!r.ok) {
-        setError(r.status === 409 ? t.conflict : t.saveError);
+        if (r.status === 401) {
+          setSessionExpired(true);
+          setError(t.sessionExpired);
+        } else {
+          setError(r.status === 409 ? t.conflict : t.saveError);
+        }
         return false;
       }
       if (
@@ -237,6 +271,7 @@ export function DeadlineWorkspace({
     formDialog.current?.showModal();
   }
   const zone = data?.preferences.timezone ?? 'UTC';
+  const selectedGoogleUrl = selected ? googleCalendarUrl(selected, zone) : null;
   const events = filterEvents(data?.events ?? [], filters, zone);
   const activeEvents = (data?.events ?? [])
     .filter((e) => e.status === 'active' && (eventDate(e, zone) ?? '') >= today)
@@ -246,11 +281,20 @@ export function DeadlineWorkspace({
           eventDate(b, zone) ?? '9999',
         ) || a.event_key.localeCompare(b.event_key),
     );
+  const personalCount = (data?.events ?? []).filter(
+    (e) => e.origin === 'user_created' && e.status === 'active',
+  ).length;
   const formatDate = (s: string) =>
     new Intl.DateTimeFormat(locale, {
       dateStyle: 'long',
       timeZone: 'UTC',
     }).format(new Date(`${s}T12:00:00Z`));
+  const formatMonth = (value: Temporal.PlainDate) =>
+    new Intl.DateTimeFormat(locale, {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${value.with({ day: 1 })}T12:00:00Z`));
   function eventLabel(e: CalendarEvent) {
     return e.origin === 'official'
       ? e.verified
@@ -378,10 +422,15 @@ export function DeadlineWorkspace({
       </p>
       {error ? (
         <p role="alert" className="feedback-box">
-          {error}
+          {error}{' '}
+          {sessionExpired ? (
+            <a className="ui-button" href={`/${locale}/login`}>
+              {t.signIn}
+            </a>
+          ) : null}
         </p>
       ) : null}
-      {loadError ? (
+      {loadError && !data ? (
         <section className="deadline-empty" role="alert">
           <h2>{t.loadError}</h2>
           <button
@@ -396,6 +445,19 @@ export function DeadlineWorkspace({
         <p role="status">{t.loading}</p>
       ) : (
         <>
+          {loadError ? (
+            <p role="alert" className="feedback-box">
+              {t.refreshError}{' '}
+              <button
+                type="button"
+                className="ui-button"
+                disabled={busy}
+                onClick={reload}
+              >
+                {busy ? t.loading : t.retry}
+              </button>
+            </p>
+          ) : null}
           {data.truncated ? <p className="feedback-box">{t.limited}</p> : null}
           {section === 'dashboard' ? (
             <>
@@ -423,10 +485,10 @@ export function DeadlineWorkspace({
                     icon: 'search' as const,
                   },
                   {
-                    label: t.applications,
-                    value: data.applications,
-                    path: 'calendar',
-                    icon: 'book' as const,
+                    label: t.personalDates,
+                    value: personalCount,
+                    path: 'calendar?category=custom',
+                    icon: 'plus' as const,
                   },
                   {
                     label: t.upcoming,
@@ -452,6 +514,51 @@ export function DeadlineWorkspace({
                   </a>
                 ))}
               </section>
+              {activeEvents.length ? (
+                <section
+                  className="deadline-radar"
+                  aria-labelledby="deadline-radar-title"
+                >
+                  <div className="deadline-panel-title">
+                    <h2 id="deadline-radar-title">{t.nextDates}</h2>
+                    <a href={`/${locale}/calendar`}>
+                      {t.viewAll}
+                      <Icon name="arrow" />
+                    </a>
+                  </div>
+                  <ol className="deadline-radar-list">
+                    {activeEvents.slice(0, 3).map((event) => {
+                      const remaining = daysUntil(event, zone, today);
+                      return (
+                        <li key={event.event_key}>
+                          <button
+                            type="button"
+                            className="deadline-radar-item"
+                            onClick={() => openEvent(event)}
+                          >
+                            <span
+                              className={`deadline-dot deadline-dot--${event.category}`}
+                            />
+                            <span className="deadline-radar-copy">
+                              <strong>{event.title}</strong>
+                              <small>
+                                {eventLabel(event)} ·{' '}
+                                {formatDate(eventDate(event, zone)!)}
+                              </small>
+                            </span>
+                            <span className="deadline-radar-days">
+                              {remaining === 0
+                                ? t.dueToday
+                                : t.daysLeft.replace('{n}', String(remaining))}
+                            </span>
+                            <Icon name="arrow" />
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </section>
+              ) : null}
               <div className="deadline-overview">
                 <section className="deadline-panel">
                   <div className="deadline-panel-title">
@@ -673,7 +780,13 @@ export function DeadlineWorkspace({
                 </div>
               </div>
               <div className="deadline-panel-title">
-                <h2>{formatDate(date)}</h2>
+                <h2>
+                  {view === 'month'
+                    ? formatMonth(cursor)
+                    : view === 'week'
+                      ? `${formatDate(start.toString())} – ${formatDate(start.add({ days: 6 }).toString())}`
+                      : formatDate(date)}
+                </h2>
                 <p aria-live="polite">
                   {t.results}: {events.length}
                 </p>
@@ -700,6 +813,7 @@ export function DeadlineWorkspace({
                       <section
                         key={key}
                         className={`deadline-day ${key === today ? 'deadline-day--today' : ''} ${view === 'month' && d.month !== cursor.month ? 'deadline-day--outside' : ''}`}
+                        data-events={list.length}
                         aria-label={formatDate(key)}
                       >
                         <button
@@ -943,6 +1057,10 @@ export function DeadlineWorkspace({
               className="deadline-preferences"
               onSubmit={async (e) => {
                 e.preventDefault();
+                if (!draft.lead_days.length) {
+                  setError(t.leadRequired);
+                  return;
+                }
                 if (!preferencesSchema.safeParse(draft).success) {
                   setError(t.saveError);
                   return;
@@ -1012,6 +1130,11 @@ export function DeadlineWorkspace({
                         <input
                           type="checkbox"
                           checked={draft.lead_days.includes(n)}
+                          disabled={
+                            draft.lead_days.length === 1 &&
+                            draft.lead_days.includes(n)
+                          }
+                          aria-describedby="lead-hint"
                           onChange={(e) =>
                             setDraft({
                               ...draft,
@@ -1025,7 +1148,9 @@ export function DeadlineWorkspace({
                       </label>
                     ))}
                   </div>
-                  <p className="field-help">{t.leadHint}</p>
+                  <p className="field-help" id="lead-hint">
+                    {t.leadHint}
+                  </p>
                 </fieldset>
                 <div className="deadline-provider">
                   <Icon name="info" />
@@ -1214,6 +1339,26 @@ export function DeadlineWorkspace({
                 ? t[selected.status as 'active']
                 : selected.status}
             </p>
+            <div className="deadline-dialog-links">
+              <a
+                className="ui-button"
+                href={eventExportHref(selected.event_key, zone)}
+              >
+                <Icon name="download" />
+                {t.exportOne}
+              </a>
+              {selectedGoogleUrl ? (
+                <a
+                  className="ui-button"
+                  href={selectedGoogleUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t.googleCalendar}
+                  <Icon name="arrow" />
+                </a>
+              ) : null}
+            </div>
             <div className="deadline-dialog-actions">
               {selected.origin === 'user_created' ? (
                 <>

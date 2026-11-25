@@ -74,9 +74,8 @@ export async function POST(request: Request) {
   const origin = request.headers.get('origin');
   let sameOrigin = false;
   try {
-    sameOrigin = Boolean(
-      origin && new URL(origin).host === request.headers.get('host'),
-    );
+    const host = request.headers.get('host');
+    sameOrigin = Boolean(origin && host && new URL(origin).host === host);
   } catch {
     /* malformed Origin fails closed */
   }

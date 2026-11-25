@@ -149,9 +149,14 @@ export default async function SavedPage({
           <h1>{t.savedTitle}</h1>
           <p>{t.savedIntro}</p>
         </div>
-        <a className="ui-button ui-button--accent" href={`/${locale}/search`}>
-          {t.search}
-        </a>
+        <div className="saved-heading-actions">
+          <a className="ui-button ui-button--accent" href={`/${locale}/search`}>
+            {t.search}
+          </a>
+          <a className="ui-button" href={`/${locale}/calendar`}>
+            {t.openCalendar}
+          </a>
+        </div>
       </header>
       {statusText && (
         <p
@@ -167,7 +172,19 @@ export default async function SavedPage({
         </p>
       )}
       <section className="saved-section" aria-labelledby="saved-items-title">
-        <h2 id="saved-items-title">{t.savedItems}</h2>
+        <div className="saved-section-head">
+          <h2 id="saved-items-title">{t.savedItems}</h2>
+          {groups.degree_program.length >= 2 ? (
+            <a
+              className="ui-button"
+              href={`/${locale}/compare?ids=${groups.degree_program
+                .slice(0, 4)
+                .join(',')}`}
+            >
+              {t.compareOpen}
+            </a>
+          ) : null}
+        </div>
         {!items?.length ? (
           <div className="search-state">
             <p>{t.noSavedItems}</p>

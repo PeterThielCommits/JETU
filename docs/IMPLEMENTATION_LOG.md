@@ -581,3 +581,18 @@ two additive migrations applied; cron succeeds. Exact-SHA primary Vercel preview
 READY and smoke-tested (health200, private APIs401, locale login redirects,
 search REST/RPC200). Full E2E80 pass/4 Auth skips, UI28, unit/integration150.
 Hosted signed-in two-account browser gate remains open; label PARTIAL preserved.
+
+## Quality and feature pass — 2026-11-25
+
+Audited the completed MVP without promoting a phase. Fixed dependency advisories
+(next 16.4.6, @next/env 16.4.6, typescript-eslint 8.74.0; npm audit 0), PostgREST
+cursor quoting, ICS all-day/instant DTEND and source URLs, single-event export,
+catalogue date-only deadline expiry/formatting, matching same-origin detection,
+search date-only formatting, onboarding tile error associations and expired-link
+copy, and programme-detail null campus rendering. Added deadline radar, personal
+dates stat, Google Calendar/per-event ICS links, deadline watch/unwatch actions,
+richer programme facts, save-from-detail, saved-page compare/calendar shortcuts,
+localized cost periods, and a doctorate filter. Local gates: npm run check PASS,
+159 unit/integration, 34 journey UI, 80 production E2E with 4 hosted-Auth skips.
+Hosted signed-in acceptance remains unverified. See
+docs/QUALITY_AUDIT_2026-11-25.md for exact evidence and limitations.

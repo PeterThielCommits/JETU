@@ -44,9 +44,7 @@ export function AccountExperience({
   const signup = mode === 'signup';
   const [state, formAction, pending] = useActionState<AccountState, FormData>(
     action,
-    initialError
-      ? { status: 'error', error: 'credentials' }
-      : initialAccountState,
+    initialError ? { status: 'error', error: 'link' } : initialAccountState,
   );
   const [values, setValues] = useState({
     name: '',

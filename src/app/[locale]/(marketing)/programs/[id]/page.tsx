@@ -7,12 +7,20 @@ import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ status?: string }>;
 }) {
   const { locale, id } = await params;
   if (!isLocale(locale) || !/^[1-9][0-9]*$/.test(id)) notFound();
-  return <ProgramDetail locale={locale} id={id} />;
+  return (
+    <ProgramDetail
+      locale={locale}
+      id={id}
+      status={(await searchParams).status}
+    />
+  );
 }
 
 export async function generateMetadata({

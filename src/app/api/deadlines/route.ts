@@ -5,6 +5,7 @@ import { loadDeadlineWorkspace } from '@/features/deadlines/service';
 import {
   customEventSchema,
   defaultPreferences,
+  notificationCursorFilter,
   preferencesSchema,
 } from '@/features/deadlines/model';
 export const dynamic = 'force-dynamic';
@@ -53,13 +54,13 @@ export async function GET(request?: Request) {
           id: params.get('before_id'),
         });
       if (!cursor.success) return errorResponse('VALIDATION_FAILED');
+      // Quote the timestamp: PostgREST treats an unquoted `+00:00` offset as
+      // a space in its filter grammar, which would silently return no rows.
       const { data: rows, error } = await client
         .from('notifications')
         .select('*')
         .eq('user_id', data.user.id)
-        .or(
-          `created_at.lt.${cursor.data.before},and(created_at.eq.${cursor.data.before},id.lt.${cursor.data.id})`,
-        )
+        .or(notificationCursorFilter(cursor.data.before, cursor.data.id))
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
         .limit(100);

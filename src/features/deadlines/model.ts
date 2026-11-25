@@ -205,3 +205,24 @@ export function retryDelay(attempt: number, random = 0.5) {
     (0.75 + Math.max(0, Math.min(1, random)) * 0.5)
   );
 }
+/** Whole calendar days from `today` to an event date; negative dates are past. */
+export function daysUntil(event: CalendarEvent, zone: string, today: string) {
+  const date = eventDate(event, zone);
+  if (!date) return null;
+  return Temporal.PlainDate.from(date).since(Temporal.PlainDate.from(today), {
+    largestUnit: 'days',
+  }).days;
+}
+/** Official deadline ids are encoded in the stable calendar event key. */
+export function deadlineIdFromEventKey(eventKey: string) {
+  if (!eventKey.startsWith('official:')) return null;
+  const id = Number(eventKey.slice('official:'.length));
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+/**
+ * Stable owner-scoped inbox cursor. Timestamps are quoted because PostgREST
+ * treats an unquoted `+00:00` offset as a space in its filter grammar.
+ */
+export function notificationCursorFilter(before: string, id: string) {
+  return `created_at.lt."${before}",and(created_at.eq."${before}",id.lt.${id})`;
+}

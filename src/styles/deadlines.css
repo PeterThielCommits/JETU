@@ -795,3 +795,96 @@
     margin-top: 20px;
   }
 }
+.deadline-radar {
+  margin: 24px 0;
+  padding: 24px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+}
+.deadline-radar-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.deadline-radar-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 12px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: var(--canvas);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.deadline-radar-item:hover,
+.deadline-radar-item:focus-visible {
+  border-color: var(--primary);
+  background: var(--surface-blue);
+}
+.deadline-radar-copy {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.deadline-radar-copy strong,
+.deadline-radar-copy small {
+  overflow-wrap: anywhere;
+}
+.deadline-radar-copy small {
+  color: var(--muted);
+  font-size: 13px;
+}
+.deadline-radar-days {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--surface-blue);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.deadline-dialog-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.deadline-day[data-events='1'] .deadline-day-number strong,
+.deadline-day[data-events='2'] .deadline-day-number strong,
+.deadline-day[data-events='3'] .deadline-day-number strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  min-height: 26px;
+  border-radius: 999px;
+  background: var(--surface-blue);
+  color: var(--primary);
+}
+.deadline-day[data-events='3'] .deadline-day-number strong {
+  background: var(--primary);
+  color: var(--surface);
+}
+@media (max-width: 700px) {
+  .deadline-radar {
+    padding: 18px;
+  }
+  .deadline-radar-days {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .deadline-radar-item > svg {
+    display: none;
+  }
+  .deadline-dialog-links .ui-button {
+    width: 100%;
+  }
+}

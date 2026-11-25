@@ -1,3 +1,4 @@
+import { Temporal } from '@js-temporal/polyfill';
 import type { CalendarEvent } from './model';
 const escape = (s: string) =>
   s
@@ -50,8 +51,23 @@ export function exportIcs(events: CalendarEvent[], now: string) {
       e.precision === 'date_only'
         ? `DTSTART;VALUE=DATE:${e.due_date!.replace(/-/g, '')}`
         : `DTSTART:${stamp(e.due_at!)}`,
+      ...(e.precision === 'date_only'
+        ? [
+            `DTEND;VALUE=DATE:${Temporal.PlainDate.from(e.due_date!)
+              .add({ days: 1 })
+              .toString()
+              .replace(/-/g, '')}`,
+          ]
+        : [
+            `DTEND:${stamp(
+              Temporal.Instant.from(e.due_at!).add({ hours: 1 }).toString(),
+            )}`,
+          ]),
       `SUMMARY:${escape(e.title)}`,
       `DESCRIPTION:${escape(e.origin === 'official' ? (e.verified ? 'Official source. Verify the current deadline before applying.' : 'Unverified deadline. Check the official source.') : 'Personal planning date. Not an official deadline.')}`,
+      ...(e.source_url && /^https:\/\//.test(e.source_url)
+        ? [`URL:${e.source_url.replace(/[\r\n]/g, '')}`]
+        : []),
       `STATUS:${e.status === 'canceled' || e.status === 'superseded' ? 'CANCELLED' : 'CONFIRMED'}`,
       'TRANSP:TRANSPARENT',
       'END:VEVENT',

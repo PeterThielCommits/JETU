@@ -8,7 +8,7 @@ export const filtersSchema = z
     country: optionalText,
     city: optionalText,
     level: z
-      .enum(['', 'bachelor', 'master', 'associate', 'foundation'])
+      .enum(['', 'bachelor', 'master', 'doctorate', 'associate', 'foundation'])
       .optional()
       .default(''),
     major: optionalText,
@@ -73,6 +73,11 @@ export type CatalogProgram = {
   major: string;
   teaching_language: string | null;
   study_mode: string | null;
+  languages: string[];
+  formats: string[];
+  duration_months: number | null;
+  credit_value: number | null;
+  credit_system: string | null;
   requirements: string | null;
   entrance_exams: string | null;
   tuition_amount: number | null;
@@ -226,9 +231,12 @@ async function getProgramRaw(id: string) {
     academic_unit_id: number;
     degree_level_code: string;
     primary_field_id: number;
+    duration_months: number | null;
+    credit_value: number | null;
+    credit_system: string | null;
   }>(
     'degree_programs',
-    `id=eq.${encodeURIComponent(id)}&select=id,title,academic_unit_id,degree_level_code,primary_field_id&limit=1`,
+    `id=eq.${encodeURIComponent(id)}&select=id,title,academic_unit_id,degree_level_code,primary_field_id,duration_months,credit_value,credit_system&limit=1`,
   );
   return rows[0] ?? null;
 }
@@ -251,11 +259,11 @@ async function mapProgram(
       ),
       table<{ language_code: string }>(
         'degree_program_languages',
-        `program_id=eq.${raw.id}&select=language_code&order=language_code.asc&limit=1`,
+        `program_id=eq.${raw.id}&select=language_code&order=language_code.asc&limit=50`,
       ),
       table<{ delivery_mode_code: string }>(
         'degree_program_delivery_modes',
-        `program_id=eq.${raw.id}&select=delivery_mode_code&order=delivery_mode_code.asc&limit=1`,
+        `program_id=eq.${raw.id}&select=delivery_mode_code&order=delivery_mode_code.asc&limit=50`,
       ),
       table<{
         id: number;
@@ -284,6 +292,11 @@ async function mapProgram(
     major: fields[0]?.name ?? '',
     teaching_language: languages[0]?.language_code ?? null,
     study_mode: modes[0]?.delivery_mode_code ?? null,
+    languages: languages.map((row) => row.language_code),
+    formats: modes.map((row) => row.delivery_mode_code),
+    duration_months: raw.duration_months,
+    credit_value: raw.credit_value,
+    credit_system: raw.credit_system,
     requirements: null,
     entrance_exams: null,
     tuition_amount: tuition[0]?.amount_min ?? null,
@@ -308,7 +321,7 @@ export async function getProgramsForUniversity(id: string) {
     NonNullable<Awaited<ReturnType<typeof getProgramRaw>>>
   >(
     'degree_programs',
-    `academic_unit_id=in.(${ids})&select=id,title,academic_unit_id,degree_level_code,primary_field_id&order=title.asc&limit=100`,
+    `academic_unit_id=in.(${ids})&select=id,title,academic_unit_id,degree_level_code,primary_field_id,duration_months,credit_value,credit_system&order=title.asc&limit=100`,
   );
   return Promise.all(raws.map(mapProgram));
 }
@@ -358,41 +371,68 @@ export async function getIntakes(programId: string) {
       )
     : [];
   const deadlines = deadlineLinks.length
-    ? await table<{ id: number; due_at: string | null }>(
+    ? await table<{
+        id: number;
+        due_at: string | null;
+        due_date: string | null;
+        date_precision: string | null;
+      }>(
         'deadlines',
-        `id=in.(${deadlineLinks.map((link) => link.deadline_id).join(',')})&select=id,due_at&limit=500`,
+        `id=in.(${deadlineLinks.map((link) => link.deadline_id).join(',')})&select=id,due_at,due_date,date_precision&limit=500`,
       )
     : [];
+  const today = new Date().toISOString().slice(0, 10);
   return rows.map((row) => {
     const dates = rounds
       .filter((round) => round.intake_id === row.id)
-      .flatMap((round) => [
-        round.closes_at,
-        ...deadlineLinks
-          .filter((link) => link.application_round_id === round.id)
-          .map(
-            (link) =>
-              deadlines.find((deadline) => deadline.id === link.deadline_id)
-                ?.due_at ?? null,
-          ),
-      ])
-      .filter(
-        (value): value is string =>
-          Boolean(value) && new Date(value!).getTime() >= Date.now(),
+      .flatMap((round) => {
+        const values: {
+          at: string;
+          id: number | null;
+          dateOnly: string | null;
+        }[] = [];
+        if (round.closes_at)
+          values.push({ at: round.closes_at, id: null, dateOnly: null });
+        for (const link of deadlineLinks.filter(
+          (item) => item.application_round_id === round.id,
+        )) {
+          const deadline = deadlines.find(
+            (item) => item.id === link.deadline_id,
+          );
+          if (!deadline) continue;
+          const at =
+            deadline.due_at ??
+            (deadline.due_date ? `${deadline.due_date}T12:00:00Z` : null);
+          if (at)
+            values.push({
+              at,
+              id: deadline.id,
+              dateOnly: deadline.due_at ? null : deadline.due_date,
+            });
+        }
+        return values;
+      })
+      .filter((value) =>
+        value.dateOnly
+          ? // A date-only deadline stays open for the whole calendar day.
+            value.dateOnly >= today
+          : new Date(value.at).getTime() >= Date.now(),
       )
       .sort((a, b) => {
         // Chronological when both are parseable timestamps (uniform
         // Postgres timestamptz ISO output); lexicographic otherwise.
-        const ta = Date.parse(a);
-        const tb = Date.parse(b);
+        const ta = Date.parse(a.at);
+        const tb = Date.parse(b.at);
         if (Number.isNaN(ta) || Number.isNaN(tb))
-          return a < b ? -1 : a > b ? 1 : 0;
+          return a.at < b.at ? -1 : a.at > b.at ? 1 : 0;
         return ta - tb;
       });
     return {
       label: row.term_code,
       starts_on: row.starts_on,
-      deadline_at: dates[0] ?? null,
+      deadline_at: dates[0]?.at ?? null,
+      deadline_date: dates[0]?.dateOnly ?? null,
+      deadline_id: dates[0]?.id ?? null,
     };
   });
 }
