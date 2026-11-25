@@ -52,7 +52,11 @@ select ok((select count(*)>=2 from public.notification_preference_audit where us
 select ok((select count(*)=0 from public.notification_jobs where channel<>'in_app'),'unconfigured external channels never queued');
 
 -- Canonical official deadline, source provenance and correction fixtures, rollback only.
-update public.notification_preferences set paused=false where user_id='23000000-0000-4000-8000-000000000001';
+-- Re-pin the opt-in clock after re-enabling: the timezone trigger would otherwise
+-- stamp real wall-clock time and suppress every injected-clock reminder.
+alter table public.notification_preferences disable trigger notification_timezone;
+update public.notification_preferences set paused=false,updated_at='2026-11-01' where user_id='23000000-0000-4000-8000-000000000001';
+alter table public.notification_preferences enable trigger notification_timezone;
 create temporary table phase23_source(id bigint);
 with s as(insert into public.official_sources(canonical_url,publisher_name,source_title,locale,last_checked_at) values('https://fixture.example/phase23-deadline','TEST ONLY Publisher','TEST ONLY Deadline','en',now()) returning id) insert into phase23_source select id from s;
 create temporary table phase23_deadline(id bigint);
