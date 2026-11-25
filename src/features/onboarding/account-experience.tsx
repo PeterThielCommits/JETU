@@ -12,6 +12,7 @@ import { Icon } from '@/components/ui/icon';
 import { authCopy } from '@/lib/i18n/auth';
 import type { Locale } from '@/lib/i18n/messages';
 import { journeyCopy } from './journey-copy';
+import { emailSuggestion, passwordStrength } from './account-quality';
 import {
   accountSchema,
   registrationSchema,
@@ -54,6 +55,7 @@ export function AccountExperience({
     age: false,
   });
   const [show, setShow] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
   const [fields, setFields] = useState<string[]>([]);
   const [localError, setLocalError] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -61,6 +63,26 @@ export function AccountExperience({
   const [dismissedConfirmation, setDismissedConfirmation] =
     useState<AccountState | null>(null);
   const errors = [...fields, ...(state.fields ?? [])];
+  const strength = passwordStrength(values.password);
+  const suggestion = emailSuggestion(values.email);
+  const fieldError = (
+    field: 'name' | 'email' | 'password' | 'age' | 'terms',
+  ) => (errors.includes(field) ? t.fieldErrors[field] : '');
+  const unmappedErrors = errors.filter((field) => !(field in t.fieldErrors));
+  const describedBy = (
+    field: 'name' | 'email' | 'password' | 'age' | 'terms',
+    extra: string[] = [],
+  ) => {
+    const ids = [
+      ...(fieldError(field)
+        ? [`account-${field}-error`]
+        : unmappedErrors.length
+          ? ['account-error-hint']
+          : []),
+      ...extra,
+    ];
+    return ids.length ? ids.join(' ') : undefined;
+  };
   useEffect(() => {
     if (state.status === 'error') {
       const control = firstInvalidControl(formRef.current, state.fields ?? []);
@@ -151,6 +173,33 @@ export function AccountExperience({
         </p>
         <h1 id="account-title">{signup ? a.signupTitle : a.loginTitle}</h1>
         <p className="journey-note">{signup ? t.signupLead : t.loginLead}</p>
+        {signup ? (
+          <ol className="account-flow" aria-label={t.flowLabel}>
+            {t.signupFlow.map((step, index) => (
+              <li key={step} aria-current={index === 0 ? 'step' : undefined}>
+                <span className="account-flow-number" aria-hidden="true">
+                  {index + 1}
+                </span>
+                <span className="account-flow-copy">
+                  <strong>{step}</strong>
+                  <small>{t.signupFlowHints[index]}</small>
+                </span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <ul
+            className="account-highlights"
+            aria-label={t.loginHighlightsLabel}
+          >
+            {t.loginHighlights.map((item) => (
+              <li key={item}>
+                <Icon name="check" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        )}
         {(localError || state.status === 'error') && (
           <div
             ref={errorRef}
@@ -179,20 +228,24 @@ export function AccountExperience({
                   id="account-name"
                   name="name"
                   autoComplete="name"
+                  enterKeyHint="next"
                   required
                   minLength={2}
                   maxLength={80}
                   value={values.name}
                   aria-invalid={errors.includes('name')}
-                  aria-describedby={
-                    errors.includes('name') ? 'account-error-hint' : undefined
-                  }
+                  aria-describedby={describedBy('name')}
                   onChange={(e) =>
                     setValues({ ...values, name: e.target.value })
                   }
                 />
               </label>
             )}
+            {signup && fieldError('name') ? (
+              <p id="account-name-error" className="field-error">
+                {fieldError('name')}
+              </p>
+            ) : null}
             <label className="ui-field" htmlFor="account-email">
               <span>{a.email}</span>
               <input
@@ -203,18 +256,42 @@ export function AccountExperience({
                 inputMode="email"
                 autoCapitalize="none"
                 spellCheck={false}
+                enterKeyHint="next"
                 required
                 maxLength={320}
                 value={values.email}
                 aria-invalid={errors.includes('email')}
-                aria-describedby={
-                  errors.includes('email') ? 'account-error-hint' : undefined
-                }
+                aria-describedby={describedBy(
+                  'email',
+                  suggestion ? ['account-email-suggestion'] : [],
+                )}
                 onChange={(e) =>
                   setValues({ ...values, email: e.target.value })
                 }
               />
             </label>
+            {fieldError('email') ? (
+              <p id="account-email-error" className="field-error">
+                {fieldError('email')}
+              </p>
+            ) : null}
+            {suggestion ? (
+              <p
+                id="account-email-suggestion"
+                className="account-email-suggestion"
+                aria-live="polite"
+              >
+                <Icon name="info" />
+                <span>{t.emailSuggestion.replace('{email}', suggestion)}</span>
+                <button
+                  type="button"
+                  className="ui-button"
+                  onClick={() => setValues({ ...values, email: suggestion })}
+                >
+                  {t.useSuggestion}
+                </button>
+              </p>
+            ) : null}
             <label className="ui-field" htmlFor="account-password">
               <span>{a.password}</span>
             </label>
@@ -224,12 +301,22 @@ export function AccountExperience({
                 name="password"
                 type={show ? 'text' : 'password'}
                 autoComplete={signup ? 'new-password' : 'current-password'}
+                enterKeyHint={signup ? 'next' : 'done'}
                 required
                 minLength={8}
                 maxLength={128}
                 value={values.password}
                 aria-invalid={errors.includes('password')}
-                aria-describedby="password-help"
+                aria-describedby={describedBy('password', [
+                  'password-help',
+                  ...(signup && values.password.length > 0
+                    ? ['password-strength']
+                    : []),
+                  ...(capsLock ? ['account-caps'] : []),
+                ])}
+                onKeyDown={(e) => setCapsLock(e.getModifierState('CapsLock'))}
+                onKeyUp={(e) => setCapsLock(e.getModifierState('CapsLock'))}
+                onBlur={() => setCapsLock(false)}
                 onChange={(e) =>
                   setValues({ ...values, password: e.target.value })
                 }
@@ -246,17 +333,55 @@ export function AccountExperience({
             <p id="password-help" className="field-help">
               {t.passwordHelp}
             </p>
-            {signup && values.password.length > 0 && (
-              <p
-                className={`password-feedback ${values.password.length >= 8 ? 'is-ready' : ''}`}
-                role="status"
-              >
-                {values.password.length >= 8
-                  ? t.passwordReady
-                  : t.passwordShort}
+            {fieldError('password') ? (
+              <p id="account-password-error" className="field-error">
+                {fieldError('password')}
               </p>
-            )}
-            {errors.length > 0 && (
+            ) : null}
+            {capsLock ? (
+              <p id="account-caps" className="account-caps" role="status">
+                <Icon name="info" />
+                {t.capsLock}
+              </p>
+            ) : null}
+            {signup && values.password.length > 0 ? (
+              <div
+                id="password-strength"
+                className="password-strength"
+                data-score={strength.score}
+              >
+                <div className="password-strength-head">
+                  <span>{t.passwordStrengthLabel}</span>
+                  <strong aria-live="polite">
+                    {t.passwordStrength[strength.score]}
+                  </strong>
+                </div>
+                <div className="password-strength-bars" aria-hidden="true">
+                  {[1, 2, 3, 4].map((level) => (
+                    <span
+                      key={level}
+                      data-on={strength.score >= level ? 'true' : 'false'}
+                    />
+                  ))}
+                </div>
+                <ul className="password-checks">
+                  {(['length', 'long', 'mixed', 'symbol'] as const).map(
+                    (key) => (
+                      <li key={key} data-ok={strength.checks[key]}>
+                        <span aria-hidden="true">
+                          {strength.checks[key] ? '✓' : '·'}
+                        </span>
+                        {t.passwordChecks[key]}
+                      </li>
+                    ),
+                  )}
+                </ul>
+                {strength.common ? (
+                  <p className="password-common">{t.passwordCommon}</p>
+                ) : null}
+              </div>
+            ) : null}
+            {unmappedErrors.length > 0 && (
               <p id="account-error-hint" className="field-error">
                 {t.errors.invalid}
               </p>
@@ -270,12 +395,18 @@ export function AccountExperience({
                     required
                     checked={values.age}
                     aria-invalid={errors.includes('age')}
+                    aria-describedby={describedBy('age')}
                     onChange={(e) =>
                       setValues({ ...values, age: e.target.checked })
                     }
                   />
                   <span>{a.age}</span>
                 </label>
+                {fieldError('age') ? (
+                  <p id="account-age-error" className="field-error">
+                    {fieldError('age')}
+                  </p>
+                ) : null}
                 <label className="check-row">
                   <input
                     type="checkbox"
@@ -283,12 +414,18 @@ export function AccountExperience({
                     required
                     checked={values.terms}
                     aria-invalid={errors.includes('terms')}
+                    aria-describedby={describedBy('terms')}
                     onChange={(e) =>
                       setValues({ ...values, terms: e.target.checked })
                     }
                   />
                   <span>{t.agreement}</span>
                 </label>
+                {fieldError('terms') ? (
+                  <p id="account-terms-error" className="field-error">
+                    {fieldError('terms')}
+                  </p>
+                ) : null}
                 <p className="account-legal-links">
                   <a
                     href={`/${locale}/privacy`}
@@ -319,11 +456,21 @@ export function AccountExperience({
                 ? t.pending
                 : t.loginPending
               : signup
-                ? a.signUp
-                : a.signIn}
+                ? t.submitSignup
+                : t.submitLogin}
             <Icon name="arrow" />
           </button>
         </form>
+        {!signup ? (
+          <details className="account-help">
+            <summary>{t.loginHelpTitle}</summary>
+            <ul>
+              <li>{t.loginHelpCaps}</li>
+              <li>{t.loginHelpReset}</li>
+              <li>{t.loginHelpEmail}</li>
+            </ul>
+          </details>
+        ) : null}
         {signup && <p className="account-privacy-note">{t.accountPrivate}</p>}
         <div className="auth-links">
           <span>

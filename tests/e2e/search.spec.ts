@@ -19,6 +19,26 @@ for (const locale of ['ru', 'kk', 'en']) {
   });
 }
 
+test('sort controls explain order, preserve URL state and expose quick deadlines', async ({
+  page,
+}) => {
+  await page.goto('/en/search');
+  await expect(
+    page.getByRole('link', { name: 'Closing soon', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('link', { name: 'Closing soon', exact: true }).click();
+  await expect(page).toHaveURL(/sort=deadline/);
+  await expect(page.locator('.search-sort-summary')).toContainText(
+    'Closing soon',
+  );
+  await expect(
+    page.getByRole('link', { name: 'Fresh sources', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('link', { name: 'Next 30 days', exact: true }).click();
+  await expect(page).toHaveURL(/deadline=\d{4}-\d{2}-\d{2}/);
+  await expect(page).toHaveURL(/sort=deadline/);
+});
+
 test('search and comparison stay within a 320px page viewport', async ({
   page,
 }) => {

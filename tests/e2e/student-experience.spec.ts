@@ -64,6 +64,25 @@ for (const locale of ['ru', 'kk', 'en']) {
   });
 }
 
+test('signup gives live password guidance and catches email typos', async ({
+  page,
+}) => {
+  await page.goto('/en/signup');
+  const email = page.getByLabel('Email address', { exact: true });
+  await email.fill('student@gmial.com');
+  await expect(page.getByText('Did you mean student@gmail.com?')).toBeVisible();
+  await page.getByRole('button', { name: 'Use this address' }).click();
+  await expect(email).toHaveValue('student@gmail.com');
+  const password = page.getByLabel('Password', { exact: true });
+  await password.fill('short');
+  await expect(page.locator('.password-strength')).toContainText('Too short');
+  await expect(page.locator('.password-strength')).toContainText(
+    '8+ characters',
+  );
+  await password.fill('Abcdefgh1234!');
+  await expect(page.locator('.password-strength')).toContainText('Strong');
+});
+
 test('registration validates locally and retains entries when the real unconfigured provider fails', async ({
   page,
 }) => {

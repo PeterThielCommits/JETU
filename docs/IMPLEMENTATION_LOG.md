@@ -596,3 +596,11 @@ localized cost periods, and a doctorate filter. Local gates: npm run check PASS,
 159 unit/integration, 34 journey UI, 80 production E2E with 4 hosted-Auth skips.
 Hosted signed-in acceptance remains unverified. See
 docs/QUALITY_AUDIT_2026-11-25.md for exact evidence and limitations.
+
+Follow-up UX pass on the same date added local signup/login guidance (password
+strength meter, caps-lock warning, email-domain typo suggestion, per-field
+errors, signup flow preview, login help) and a search ordering toolbar (icon
+sort options with hints, "sorted by" summary, result/type counts, quick deadline
+chips, urgency badges). Final gates after the pass: npm run check PASS, 166
+unit/integration across 19 files, 34 journey UI, 84 production E2E with the same
+4 hosted-Auth skips; npm audit remains 0.

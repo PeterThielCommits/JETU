@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { MarketingFooter } from '@/components/marketing/footer';
+import { Icon } from '@/components/ui/icon';
 import type { Locale } from '@/lib/i18n/messages';
 import { saveCatalogItem, saveSearch } from './actions';
 import { SearchAutocomplete } from './autocomplete';
@@ -46,6 +47,130 @@ function formatMoney(row: UnifiedSearchRow, locale: Locale) {
   return row.cost_period
     ? `${range} / ${t.period[row.cost_period as keyof typeof t.period] ?? row.cost_period}`
     : range;
+}
+
+function isoDaysFromNow(days: number) {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function deadlineUrgency(value: string | null, locale: Locale) {
+  if (!value) return null;
+  const due = value.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(due)) return null;
+  const today = new Date().toISOString().slice(0, 10);
+  const days = Math.round(
+    (Date.parse(`${due}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) /
+      86_400_000,
+  );
+  const t = searchCopy[locale];
+  if (days < 0) return { tone: 'past', label: t.deadlinePassed };
+  if (days === 0) return { tone: 'today', label: t.dueToday };
+  if (days === 1) return { tone: 'tomorrow', label: t.dueTomorrow };
+  if (days <= 30)
+    return { tone: 'soon', label: t.daysLeft.replace('{n}', String(days)) };
+  return null;
+}
+
+function sortOptions(locale: Locale) {
+  const t = searchCopy[locale];
+  return [
+    {
+      value: 'relevance',
+      label: t.relevance,
+      hint: t.relevanceHint,
+      icon: 'search',
+    },
+    {
+      value: 'deadline',
+      label: t.deadlineSort,
+      hint: t.deadlineHint,
+      icon: 'calendar',
+    },
+    {
+      value: 'recent',
+      label: t.recent,
+      hint: t.recentHint,
+      icon: 'arrowUp',
+    },
+    {
+      value: 'title',
+      label: t.titleSort,
+      hint: t.titleHint,
+      icon: 'book',
+    },
+  ] as const;
+}
+
+function SortToolbar({
+  locale,
+  filters,
+  total,
+}: {
+  locale: Locale;
+  filters: SearchFilters;
+  total: number;
+}) {
+  const t = searchCopy[locale];
+  const options = sortOptions(locale);
+  const active =
+    options.find((option) => option.value === filters.sort) ?? options[0];
+  const quick = [
+    { label: t.anyDeadline, value: '' },
+    { label: t.next7, value: isoDaysFromNow(7) },
+    { label: t.next30, value: isoDaysFromNow(30) },
+  ];
+  return (
+    <section className="search-sortbar" aria-label={t.sort}>
+      <div className="search-sortbar-head">
+        <span className="search-sortbar-kicker">{t.sort}</span>
+        <strong>{active.label}</strong>
+        <span className="search-sortbar-count">
+          {total === 1
+            ? t.resultCountOne
+            : t.resultsCount.replace('{n}', String(total))}
+        </span>
+      </div>
+      <p className="search-sortbar-hint">{active.hint}</p>
+      <nav className="search-sort-options" aria-label={t.sort}>
+        {options.map((option) => (
+          <a
+            key={option.value}
+            href={queryHref(locale, filters, {
+              sort: option.value,
+              page: 1,
+            })}
+            aria-current={filters.sort === option.value ? 'true' : undefined}
+            title={option.hint}
+          >
+            <Icon name={option.icon} />
+            <span>{option.label}</span>
+          </a>
+        ))}
+      </nav>
+      <div
+        className="search-quick-deadlines"
+        role="group"
+        aria-label={t.deadlineQuick}
+      >
+        {quick.map((item) => (
+          <a
+            key={item.label}
+            href={queryHref(locale, filters, {
+              deadline: item.value,
+              page: 1,
+            })}
+            aria-current={
+              item.value && filters.deadline === item.value ? 'true' : undefined
+            }
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 function queryHref(
@@ -158,6 +283,7 @@ function SearchCard({
     row.entity_id,
   );
   const compareCount = (parseCompareIds(filters.compare) ?? []).length;
+  const urgency = deadlineUrgency(row.deadline_at, locale);
   return (
     <article className="search-card">
       <div className="search-card-meta">
@@ -182,7 +308,14 @@ function SearchCard({
         </div>
         <div>
           <dt>{t.deadline}</dt>
-          <dd>{formatDate(row.deadline_at, locale) ?? t.unknown}</dd>
+          <dd>
+            {formatDate(row.deadline_at, locale) ?? t.unknown}
+            {urgency ? (
+              <span className="search-deadline-badge" data-tone={urgency.tone}>
+                {urgency.label}
+              </span>
+            ) : null}
+          </dd>
         </div>
         <div>
           <dt>{t.costLabel}</dt>
@@ -259,6 +392,10 @@ export async function UnifiedSearchPage({
     opportunity: 0,
   };
   const compareIds = filters ? (parseCompareIds(filters.compare) ?? []) : [];
+  const activeSort = filters
+    ? (sortOptions(locale).find((option) => option.value === filters.sort) ??
+      sortOptions(locale)[0])
+    : null;
   return (
     <>
       <main id="main" tabIndex={-1} className="page-shell search-main">
@@ -279,31 +416,19 @@ export async function UnifiedSearchPage({
                   href={queryHref(locale, filters, { type, page: 1 })}
                   aria-current={filters.type === type ? 'true' : undefined}
                 >
-                  {type ? t[type] : t.all}
+                  <span>{type ? t[type] : t.all}</span>
+                  {!filters.type ? (
+                    <span className="search-preset-count">
+                      {type ? counts[type] : total}
+                    </span>
+                  ) : null}
                 </a>
               ),
             )}
           </nav>
         )}
         {filters && (
-          <nav className="search-sort-presets" aria-label={t.sort}>
-            {(
-              [
-                ['relevance', t.relevance],
-                ['deadline', t.deadlineSort],
-                ['recent', t.recent],
-                ['title', t.titleSort],
-              ] as const
-            ).map(([sort, label]) => (
-              <a
-                key={sort}
-                href={queryHref(locale, filters, { sort, page: 1 })}
-                aria-current={filters.sort === sort ? 'true' : undefined}
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
+          <SortToolbar locale={locale} filters={filters} total={total} />
         )}
         <form
           action={`/${locale}/search`}
@@ -435,17 +560,13 @@ export async function UnifiedSearchPage({
                   defaultValue={filters?.deadline ?? ''}
                 />
               </label>
-              <label>
-                {t.sort}
-                <select name="sort" defaultValue={filters?.sort ?? 'relevance'}>
-                  <option value="relevance">{t.relevance}</option>
-                  <option value="recent">{t.recent}</option>
-                  <option value="deadline">{t.deadlineSort}</option>
-                  <option value="title">{t.titleSort}</option>
-                </select>
-              </label>
             </div>
           </details>
+          <input
+            type="hidden"
+            name="sort"
+            value={filters?.sort ?? 'relevance'}
+          />
           {filters?.compare && (
             <input type="hidden" name="compare" value={filters.compare} />
           )}
@@ -507,6 +628,11 @@ export async function UnifiedSearchPage({
                 {counts.scholarship} · {t.opportunity}: {counts.opportunity}
               </p>
             )}
+            {activeSort ? (
+              <p className="search-sort-summary">
+                {t.sortedBy} <strong>{activeSort.label}</strong>
+              </p>
+            ) : null}
           </div>
           {error ? (
             <div className="search-state" role="alert">

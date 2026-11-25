@@ -141,6 +141,243 @@
   border: 1px solid var(--border);
   border-radius: 10px;
 }
+.account-flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 22px 0 4px;
+  padding: 0;
+  list-style: none;
+}
+.account-flow li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--canvas);
+}
+.account-flow li[aria-current='step'] {
+  border-color: var(--primary);
+  background: var(--surface-blue);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.account-flow-number {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+.account-flow li[aria-current='step'] .account-flow-number {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+}
+.account-flow-copy {
+  display: grid;
+  min-width: 0;
+}
+.account-flow-copy strong {
+  font-size: 0.875rem;
+}
+.account-flow-copy small {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.account-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.account-highlights li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--success-surface);
+  color: var(--success);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.account-highlights svg {
+  width: 16px;
+  height: 16px;
+}
+.account-email-suggestion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: -10px 0 20px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--warning);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--warning-surface);
+  font-size: 0.875rem;
+}
+.account-email-suggestion > span {
+  flex: 1 1 220px;
+}
+.account-email-suggestion button {
+  min-height: 40px;
+}
+.account-caps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -8px 0 12px;
+  color: var(--warning);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+.account-caps svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+.password-strength {
+  margin: 2px 0 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--canvas);
+}
+.password-strength-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.8125rem;
+}
+.password-strength-head span {
+  color: var(--muted);
+  font-weight: 700;
+}
+.password-strength[data-score='0'] strong,
+.password-strength[data-score='1'] strong {
+  color: var(--danger);
+}
+.password-strength[data-score='2'] strong {
+  color: var(--warning);
+}
+.password-strength[data-score='3'] strong {
+  color: var(--primary);
+}
+.password-strength[data-score='4'] strong {
+  color: var(--success);
+}
+.password-strength-bars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 8px 0 10px;
+}
+.password-strength-bars span {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+  transition: background var(--duration-feedback) var(--ease-out);
+}
+.password-strength[data-score='1'] .password-strength-bars span[data-on='true'],
+.password-strength[data-score='0']
+  .password-strength-bars
+  span[data-on='true'] {
+  background: var(--danger);
+}
+.password-strength[data-score='2']
+  .password-strength-bars
+  span[data-on='true'] {
+  background: var(--warning);
+}
+.password-strength[data-score='3']
+  .password-strength-bars
+  span[data-on='true'] {
+  background: var(--primary);
+}
+.password-strength[data-score='4']
+  .password-strength-bars
+  span[data-on='true'] {
+  background: var(--success);
+}
+.password-checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.password-checks li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.password-checks li > span {
+  width: 14px;
+  flex: 0 0 auto;
+  text-align: center;
+}
+.password-checks li[data-ok='true'] {
+  color: var(--success);
+}
+.password-common {
+  margin: 8px 0 0;
+  color: var(--warning);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.account-help {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+.account-help summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+.account-help ul {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+}
+@media (max-width: 700px) {
+  .account-flow {
+    grid-template-columns: 1fr;
+  }
+  .account-flow-copy small {
+    display: none;
+  }
+  .password-checks {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .password-strength-bars span {
+    transition: none;
+  }
+}
 .account-form-panel,
 .journey-card-panel {
   min-width: 0;

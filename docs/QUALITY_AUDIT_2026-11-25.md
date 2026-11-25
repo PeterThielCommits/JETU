@@ -9,9 +9,9 @@ admissions result is claimed. Local and production-build evidence only.
 | Gate                        | Result                                                  |
 | --------------------------- | ------------------------------------------------------- |
 | `npm run check`             | PASS (format, lint, typecheck, tests, production build) |
-| Unit + integration (Vitest) | 159 passed / 18 files                                   |
+| Unit + integration (Vitest) | 166 passed / 19 files                                   |
 | Journey UI (Playwright)     | 34 passed                                               |
-| Production browser E2E      | 80 passed, 4 skipped (hosted Auth cases)                |
+| Production browser E2E      | 84 passed, 4 skipped (hosted Auth cases)                |
 | `npm audit`                 | 0 vulnerabilities (info/low/moderate/high/critical = 0) |
 | Production build routes     | 92 generated; all application routes compiled           |
 
@@ -66,6 +66,27 @@ against a hosted project remains open and outside this local workspace.
   programmes without retyping IDs.
 - **Localized cost periods** in unified search and additional dates/tags facts.
 - **Doctorate catalogue filter** and localized level label.
+
+## Follow-up: account and search UX — 2026-11-25
+
+Scope: local, deterministic usability work only. No password or email value
+leaves the browser for scoring, and no security guarantee is implied by the
+strength meter.
+
+- **Signup/login guidance.** A local password strength meter (four levels plus
+  length, mixed-case, symbol and common-password checks), a caps-lock warning,
+  an email-domain typo suggestion with one-click apply, and per-field inline
+  errors wired through `aria-invalid`/`aria-describedby`. Signup shows a
+  three-step flow preview; login lists what the account unlocks and adds a
+  help panel for caps lock, reset and email mistakes.
+- **Search ordering.** The plain sort `<select>` is replaced by an icon toolbar
+  that explains each order (relevance, closing soon, fresh sources, A–Z), a
+  live "sorted by" summary, a result count, type-preset counts, and quick
+  deadline chips for any/next 7/next 30 days. Result cards show urgency badges
+  for today, tomorrow, the next 30 days and past deadlines.
+- **Tests.** New unit coverage for `emailSuggestion` and `passwordStrength`;
+  new browser coverage for the signup guidance and the sort toolbar on desktop
+  and mobile.
 
 ## Honest limitations
 
